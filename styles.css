@@ -497,8 +497,10 @@ html.ranger body { animation: ranger 3.2s steps(5) 1; }
 @keyframes manzana { 0% { transform: translate(-50%, 0) rotate(0); } 70% { transform: translate(-50%, 55vh) rotate(25deg); } 80% { transform: translate(-50%, 50vh) rotate(18deg); } 100% { transform: translate(-50%, 56vh) rotate(25deg); opacity: 0; } }
 .pio { position: absolute; top: -6px; left: -14px; padding: 4px 10px; border-radius: 12px 12px 12px 2px; background: #ffd23f; color: #3b2a00; font: 700 13px var(--sans); box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .5); animation: pio 2.2s ease forwards; }
 @keyframes pio { 0% { opacity: 0; transform: translateY(8px) scale(.8); } 15%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-6px); } }
-.huevo-pie { margin-left: 10px; border: 1px dashed var(--border-strong); background: transparent; color: var(--muted); font-size: 12px; padding: 3px 10px; border-radius: 999px; cursor: pointer; opacity: .55; transition: opacity .2s, border-color .2s, color .2s; }
-.huevo-pie:hover, .huevo-pie.alguno { opacity: 1; color: var(--amber); border-color: color-mix(in srgb, var(--amber) 50%, transparent); }
+.huevos-fila { display: flex; justify-content: center; padding: 26px 20px 0; }
+.huevo-pie { margin-left: 0; border: 1px dashed var(--border-strong); background: transparent; color: var(--muted); font-size: 12px; padding: 3px 10px; border-radius: 999px; cursor: pointer; opacity: .4; transition: opacity .2s, border-color .2s, color .2s; }
+.huevo-pie.alguno { opacity: .75; color: var(--amber); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+.huevo-pie:hover { opacity: 1; color: var(--amber); border-color: color-mix(in srgb, var(--amber) 50%, transparent); }
 
 /* ------------------------------------------------------------ responsive */
 @media (max-width: 980px) {
