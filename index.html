@@ -76,6 +76,15 @@
                             <linearGradient id="av-bg" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="0" stop-color="#03140a"/><stop offset="1" stop-color="#010604"/>
                             </linearGradient>
+                            <filter id="av-contorno" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+                              <feMorphology in="SourceAlpha" operator="dilate" radius="1.3" result="dil"/>
+                              <feFlood flood-color="#e6fff0" flood-opacity=".6"/>
+                              <feComposite in2="dil" operator="in" result="borde"/>
+                              <feGaussianBlur in="dil" stdDeviation="3.2" result="difu"/>
+                              <feFlood flood-color="#000" flood-opacity=".7"/>
+                              <feComposite in2="difu" operator="in" result="sombra"/>
+                              <feMerge><feMergeNode in="sombra"/><feMergeNode in="borde"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
                             <radialGradient id="av-vineta" cx=".5" cy=".42" r=".62">
                               <stop offset=".45" stop-color="#010604" stop-opacity="0"/><stop offset="1" stop-color="#010604" stop-opacity=".85"/>
                             </radialGradient>
@@ -134,7 +143,7 @@
                             </g>
                             <rect width="200" height="200" fill="url(#av-vineta)"/>
                         
-                            <g class="av-cuerpo">
+                            <g class="av-cuerpo" filter="url(#av-contorno)">
                               <!-- torso: camiseta naranja -->
                               <path d="M28 200 C30 166 52 150 80 144 L120 144 C148 150 170 166 172 200 Z" fill="url(#av-tee)"/>
                               <path d="M80 144 C86 156 114 156 120 144" fill="none" stroke="#a8561f" stroke-width="3"/>
@@ -184,7 +193,7 @@
                             </g>
                         
                             <!-- pollito en el hombro: "Pollo" -->
-    <g class="av-ave">
+    <g class="av-ave" filter="url(#av-contorno)">
       <path d="M40 161 L39 166 M37 166 H41.5 M48 161 L49 166 M47 166 H51.5" stroke="#f08a24" stroke-width="1.8" stroke-linecap="round"/>
       <ellipse cx="45" cy="152" rx="11.5" ry="10.5" fill="#ffd23f"/>
       <circle cx="40" cy="140" r="8" fill="#ffd23f"/>
