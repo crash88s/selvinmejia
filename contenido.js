@@ -45,9 +45,9 @@ window.CONTENIDO = {
               desc: { es: 'Firewall, proxy, IPS y monitoreo con PRTG para servicios a nivel nacional.', en: 'Firewall, proxy, IPS and PRTG monitoring for nationwide services.' } },
         ],
         stack: [
-            { id: 'seguridad', titulo: { es: 'Seguridad', en: 'Security' }, items: ['FortiGate', 'CrowdStrike', 'Netskope', 'Darktrace', 'Lumu', 'Forescout NAC'] },
+            { id: 'seguridad', titulo: { es: 'Seguridad', en: 'Security' }, items: ['FortiGate', 'FortiManager', 'FortiAnalyzer', 'Palo Alto Networks', 'CrowdStrike', 'Netskope', 'Darktrace', 'Lumu', 'Forescout NAC'] },
             { id: 'redes', titulo: { es: 'Redes', en: 'Networking' }, items: ['Cisco IOS', 'Cisco Meraki', 'SD-WAN', 'Ubiquiti PtP / PtMP'] },
-            { id: 'monitoreo', titulo: { es: 'Monitoreo', en: 'Monitoring' }, items: ['PRTG', 'Wireshark', 'Aranda'] },
+            { id: 'monitoreo', titulo: { es: 'Monitoreo', en: 'Monitoring' }, items: ['PRTG', 'OpManager', 'Wireshark', 'Aranda'] },
             { id: 'certs', titulo: { es: 'Certificaciones', en: 'Certifications' }, items: ['Cisco CCNA R&S', 'Fortinet FortiOS 6.2', 'Ubiquiti UBWS · UBWA · UEWA'] },
         ],
     },
