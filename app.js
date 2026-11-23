@@ -183,7 +183,7 @@
         if (s.bateria != null) det.push(t('sonda.bateria', { b: s.bateria }));
         return `<div class="sonda ${ok ? 'ok' : s.estado === 'pausa' ? 'pausa' : 'bad'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
-            <span>${esc(t('sonda.titulo'))}: <b>${esc(t('sonda.' + s.estado))}</b>${det.length ? ` <i>· ${esc(det.join(' · '))}</i>` : ''}</span></div>`;
+            <span><span>${esc(t('sonda.titulo'))}: <b>${esc(t('sonda.' + s.estado))}</b></span>${det.length ? `<i>${esc(det.join(' · '))}</i>` : ''}</span></div>`;
     }
     function vivoPacketlens() {
         if (!estado) return '<span class="skel" style="width:60%"></span>';
