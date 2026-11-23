@@ -300,14 +300,6 @@ h1 { font-size: clamp(44px, 7vw, 76px); letter-spacing: -0.035em; font-weight: 7
 .barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 6px; }
 
 /* pie */
-.pie { border-top: 1px solid var(--border); padding: 30px 0 40px; color: var(--muted); font-size: 14px; }
-.pie-in { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; }
-.pie p { margin: 0; }
-.pie-hint { margin-left: auto !important; font-size: 12.5px; }
-.pie-legal { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; }
-.pie-legal .sep { margin: 0 10px; color: var(--border-strong); }
-.pie-legal a { color: var(--text-2); }
-.pie-legal a:hover { color: var(--cyan); }
 
 /* ------------------------------------------------------------- terminal */
 .term { position: fixed; inset: 0; z-index: 50; background: rgba(2, 4, 8, 0.6); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 20px; }
@@ -393,6 +385,7 @@ h1 { font-size: clamp(44px, 7vw, 76px); letter-spacing: -0.035em; font-weight: 7
 
 /* ---------------------------------------------------------------- apoyo (igual que aves) */
 :root { --corazon: #e04a3f; }
+[data-theme="light"] { --corazon: #d23a3a; }
 .apoyar-boton { position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border-radius: 999px; cursor: pointer;
     border: 1px solid color-mix(in srgb, var(--corazon) 60%, var(--border-strong));
     background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--corazon) 22%, var(--surface)), color-mix(in srgb, var(--corazon) 8%, var(--surface)));
@@ -447,6 +440,16 @@ body.flash { animation: flash88 0.7s ease-out; }
 @keyframes flash88 { 0% { filter: brightness(2.2) saturate(1.6); } 100% { filter: none; } }
 html.ranger body { animation: ranger 3.2s steps(5) 1; }
 @keyframes ranger { 0% { filter: hue-rotate(0deg); } 20% { filter: hue-rotate(140deg); } 40% { filter: hue-rotate(220deg); } 60% { filter: hue-rotate(300deg); } 80% { filter: hue-rotate(60deg); } 100% { filter: none; } }
+
+/* pie: derechos, correo, sitio y apoyo (igual que PacketLens; en el teléfono baja a varias líneas) */
+.pie { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 10px; width: 100%; max-width: 1180px; margin: 0 auto; padding: 22px 28px; color: var(--muted); font-size: 12px; }
+.pie a { color: var(--text-2); text-decoration: none; }
+.pie a:hover { color: var(--cyan); text-decoration: none; }
+.link-btn { color: var(--cyan); font-size: 12px; font-weight: 600; padding: 2px 4px; border-radius: 6px; border: 0; background: none; cursor: pointer; font-family: var(--sans); }
+.link-btn:hover { text-decoration: underline; }
+.foot-donate { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.foot-donate svg { width: 14px; height: 14px; fill: color-mix(in srgb, var(--corazon) 25%, transparent); stroke: var(--corazon); stroke-width: 1.7; stroke-linejoin: round; transform-origin: 50% 58%; animation: latido-pie 2.8s ease-in-out infinite; }
+@keyframes latido-pie { 0%, 40%, 100% { transform: scale(1); } 8% { transform: scale(1.28); } 16% { transform: scale(.95); } 24% { transform: scale(1.2); } 32% { transform: scale(1); } }
 
 /* contacto */
 .contacto { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: center; padding: 34px 36px; border-radius: 20px; border: 1px solid var(--border);
@@ -519,8 +522,7 @@ html.ranger body { animation: ranger 3.2s steps(5) 1; }
     .log .t { grid-column: 1; } .log .n { grid-column: 2; grid-row: 1; text-align: right; }
     .log .m { grid-column: 1 / -1; }
     .sec { padding: 56px 0; }
-    .pie-hint { display: none; }
-    .avatar-box { width: 96px; height: 96px; }
+        .avatar-box { width: 96px; height: 96px; }
     .stack-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     .dest-grid { grid-template-columns: 1fr; }
     .grupo { padding: 14px; }
@@ -531,4 +533,10 @@ html.ranger body { animation: ranger 3.2s steps(5) 1; }
 }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* pie en el teléfono: varias líneas, sin separadores (igual que PacketLens) */
+@media (max-width: 560px) {
+    .pie { column-gap: 12px; padding-left: 18px; padding-right: 18px; }
+    .pie .sep { display: none; }
 }

@@ -70,7 +70,7 @@
             });
         });
         $$('.lang-switch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
-        $('#pie-hint').innerHTML = esc(t('pie.secreto', { k: '§' })).replace('§', '<kbd>`</kbd>');
+        if ($('#pie-hint')) $('#pie-hint').innerHTML = esc(t('pie.secreto', { k: '§' })).replace('§', '<kbd>`</kbd>');
         renderTodo();
     }
     function cambiarIdioma(nuevo) {
@@ -874,7 +874,7 @@
         } catch (e) { /* modo privado */ }
         if (nueva) evento('visita', lang, { o: origenVisita(), r: vuelve, th: root.dataset.theme });
     }
-    $('#huevo-pie').addEventListener('click', () => { abrirTerm(); setTimeout(() => ejecutar('huevos'), 60); });
+    if ($('#huevo-pie')) $('#huevo-pie').addEventListener('click', () => { abrirTerm(); setTimeout(() => ejecutar('huevos'), 60); });
     cargarEstado();
     setInterval(tic, 1000);
     setInterval(() => { if (!document.hidden) cargarEstado(); }, REFRESCO);
