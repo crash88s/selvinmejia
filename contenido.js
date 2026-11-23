@@ -38,7 +38,7 @@ window.CONTENIDO = {
         },
         trayectoria: [
             { anios: { es: '2025 — hoy', en: '2025 — now' }, rol: { es: 'Ingeniero Senior de Ciberseguridad', en: 'Senior Cybersecurity Engineer' },
-              desc: { es: 'Hardening de firewalls de nueva generación y SD-WAN con failover automático.', en: 'Next-generation firewall hardening and SD-WAN with automatic failover.' } },
+              desc: { es: 'La operación completa de red y seguridad, ahora enfocada en el ecosistema Fortinet: FortiGate, FortiManager y FortiAnalyzer, SD-WAN de alta disponibilidad y ciberseguridad.', en: 'End-to-end network and security operations, now focused on the Fortinet ecosystem: FortiGate, FortiManager and FortiAnalyzer, high-availability SD-WAN and cybersecurity.' } },
             { anios: { es: '2024 — 2025', en: '2024 — 2025' }, rol: { es: 'Coordinador de Infraestructura y Operaciones TI', en: 'IT Infrastructure and Operations Lead' },
               desc: { es: 'Presupuesto y planes de trabajo de infraestructura: servidores, HCI, respaldos, NAC, EDR y el traslado del centro de datos. Disponibilidad de red superior al 99.9 %.', en: 'Infrastructure budget and work plans: servers, HCI, backups, NAC, EDR and the data center move. Network availability above 99.9%.' } },
             { anios: { es: '2016 — 2024', en: '2016 — 2024' }, rol: { es: 'Técnico en Telecomunicaciones', en: 'Telecommunications Technician' },
@@ -78,47 +78,51 @@ window.CONTENIDO = {
 
     servicios: [
         {
-            id: 'aves',
-            url: 'https://aves.selvinmejia.com',
-            nombre: { es: 'Diario de Aves', en: 'Bird Diary' },
-            tipo: { es: 'sensor · bioacústica', en: 'sensor · bioacoustics' },
-            desc: {
-                es: 'Una sonda con micrófono escucha día y noche y publica qué aves cantaron en Guatemala.',
-                en: 'A microphone probe listens day and night and publishes which birds sang in Guatemala.',
-            },
-            etiquetas: ['Audio', 'iNaturalist', 'Open-Meteo'],
-        },
-        {
             id: 'packetlens',
+            color: 'azul',
             url: 'https://packetlens.selvinmejia.com',
             nombre: { es: 'PacketLens', en: 'PacketLens' },
             tipo: { es: 'herramienta · redes', en: 'tool · networking' },
             desc: {
-                es: 'Convierte una captura de Wireshark en un diagnóstico claro. Todo se procesa en tu navegador.',
-                en: 'Turns a Wireshark capture into a clear diagnosis. Everything runs in your browser.',
+                es: 'Sube una captura de Wireshark y obtén un diagnóstico claro: quién habla con quién, qué conexiones fallan, latencias, TLS y seguridad. Todo se procesa en tu navegador.',
+                en: 'Upload a Wireshark capture and get a clear diagnosis: who talks to whom, which connections fail, latency, TLS and security. Everything runs in your browser.',
             },
             etiquetas: ['PCAP', 'TCP/IP', 'TLS', 'Workers AI'],
         },
         {
+            id: 'aves',
+            color: 'verde',
+            url: 'https://aves.selvinmejia.com',
+            nombre: { es: 'Diario de Aves', en: 'Bird Diary' },
+            tipo: { es: 'sensor · bioacústica', en: 'sensor · bioacoustics' },
+            desc: {
+                es: 'Una sonda escucha día y noche y publica qué aves cantaron.',
+                en: 'A probe listens day and night and publishes which birds sang.',
+            },
+            etiquetas: ['Audio', 'iNaturalist', 'Open-Meteo'],
+        },
+        {
             id: 'secreto',
+            color: 'corinto',
             url: 'https://secreto.selvinmejia.com',
             nombre: { es: 'Amigo Secreto', en: 'Secret Santa' },
             tipo: { es: 'app · temporada', en: 'app · seasonal' },
             desc: {
-                es: 'Sorteo, listas de deseos y mensajes anónimos para el intercambio de regalos.',
+                es: 'Sorteo, listas de deseos y mensajes anónimos para tu intercambio.',
                 en: 'Draw, wish lists and anonymous messages for your gift exchange.',
             },
             etiquetas: [{ es: 'Sorteo', en: 'Draw' }, { es: 'Listas de Deseos', en: 'Wish Lists' }, { es: 'Mensajes Anónimos', en: 'Anonymous Messages' }],
         },
         {
             id: 'mired',
+            color: 'naranja',
             url: 'https://mired.selvinmejia.com',
             privado: true,
             nombre: { es: 'Mi Red', en: 'My Network' },
             tipo: { es: 'privado · red de la casa', en: 'private · home network' },
             desc: {
-                es: 'Dashboard del router de la casa: dispositivos conectados, nuevos y bloqueados, sin abrir puertos.',
-                en: 'Home router dashboard: connected, new and blocked devices, with no open ports.',
+                es: 'El router de la casa, vigilado y sin puertos abiertos.',
+                en: 'The home router, monitored, with no open ports.',
             },
             etiquetas: ['Cloudflare Tunnel', 'Cloudflare Access', 'Node.js'],
         },
@@ -151,11 +155,11 @@ window.CONTENIDO = {
         },
         {
             fecha: '2026-11-23', nivel: 'deploy', origen: 'packetlens',
-            texto: { es: 'TSHOOT Tool ahora se llama PacketLens y vive en packetlens.selvinmejia.com.', en: 'TSHOOT Tool is now PacketLens, at packetlens.selvinmejia.com.' },
+            texto: { es: 'PacketLens estrena nombre y dominio: packetlens.selvinmejia.com.', en: 'PacketLens gets a new name and domain: packetlens.selvinmejia.com.' },
         },
         {
             fecha: '2026-11-19', nivel: 'deploy', origen: 'packetlens',
-            texto: { es: 'TSHOOT Tool v2: diagrama de flujo, seguridad TLS y explicaciones con IA.', en: 'TSHOOT Tool v2: flow diagram, TLS security checks and AI explanations.' },
+            texto: { es: 'PacketLens v2: diagrama de flujo, seguridad TLS y explicaciones con IA.', en: 'PacketLens v2: flow diagram, TLS security checks and AI explanations.' },
         },
         {
             fecha: '2026-11-10', nivel: 'deploy', origen: 'mired',

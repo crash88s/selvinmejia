@@ -25,7 +25,7 @@
             root.dataset.theme = theme === 'light' ? 'light' : 'dark';
         })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=ca4a62b414">
+    <link rel="stylesheet" href="styles.css?v=f09ac6ca42">
 </head>
 <body>
     <a class="skip" href="#servicios">Saltar al contenido</a>
@@ -87,7 +87,7 @@
                             .avatar .av-cuerpo { animation: av-respira 4.5s ease-in-out infinite; transform-origin: 100px 200px; }
                             .avatar .av-ojos { animation: av-parpadeo 5s infinite; transform-origin: 100px 99px; }
                             .avatar .av-lentes { animation: av-lentes 12s ease-in-out infinite; }
-                            .avatar .av-ave { animation: av-ave 12s ease-in-out infinite; transform-origin: 46px 164px; }
+                            .avatar .av-ave { animation: av-ave 12s ease-in-out infinite; transform-origin: 45px 165px; }
                             .avatar .av-nota { opacity: 0; animation: av-nota 12s ease-out infinite; }
                             .avatar .av-nota.n2 { animation-delay: .35s; }
                             .avatar .av-led { animation: av-led 2.2s ease-in-out infinite; }
@@ -166,21 +166,22 @@
                               </g>
                             </g>
                         
-                            <!-- garza en el hombro (guiño al diario de aves) -->
-                            <g class="av-ave">
-                              <g transform="translate(112 0) scale(-1 1) translate(0 -2)">
-                                <path d="M58 158 C56 150 61 145 68 146 C73 147 75 152 73 157 C71 162 64 164 58 158 Z" fill="#f4f6f8"/>
-                                <path d="M68 147 C67 141 69 135 73 133" fill="none" stroke="#f4f6f8" stroke-width="3.4" stroke-linecap="round"/>
-                                <circle cx="74" cy="132" r="3.5" fill="#f4f6f8"/>
-                                <path d="M76.5 131 L85 132.6 L76.5 133.6 Z" fill="#f2b705"/>
-                                <circle cx="74.6" cy="131.2" r=".9" fill="#111"/>
-                                <path d="M62 161 L61 166 M67 161 L68 166" stroke="#1b1716" stroke-width="1.4" stroke-linecap="round"/>
-                              </g>
-                            </g>
-                            <g fill="#3dff8a">
-                              <text class="av-nota" x="16" y="128" font-size="11" font-family="sans-serif">♪</text>
-                              <text class="av-nota n2" x="8" y="120" font-size="9" font-family="sans-serif">♫</text>
-                            </g>
+                            <!-- pollito en el hombro: "Pollo" -->
+    <g class="av-ave">
+      <path d="M40 161 L39 166 M37 166 H41.5 M48 161 L49 166 M47 166 H51.5" stroke="#f08a24" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse cx="45" cy="152" rx="11.5" ry="10.5" fill="#ffd23f"/>
+      <circle cx="40" cy="140" r="8" fill="#ffd23f"/>
+      <path d="M47 150 C53 148 56 152 54 157 C51 157 48 155 47 150 Z" fill="#f5b800"/>
+      <path d="M38 132.5 C37 129 39.5 127.5 41 129.5 C41.5 127 44.5 127.5 43.5 131" fill="none" stroke="#f5b800" stroke-width="1.8" stroke-linecap="round"/>
+      <circle cx="37.2" cy="139" r="1.5" fill="#1b1716"/>
+      <circle cx="37.6" cy="138.5" r=".45" fill="#fff"/>
+      <circle cx="40" cy="143" r="1.6" fill="#ff9e7a" opacity=".7"/>
+      <path d="M33.5 140.3 L28.5 142 L33.5 143.6 Z" fill="#f08a24"/>
+    </g>
+    <g fill="#ffd23f">
+      <text class="av-nota" x="16" y="128" font-size="11" font-family="sans-serif">♪</text>
+      <text class="av-nota n2" x="8" y="120" font-size="9" font-family="sans-serif">♫</text>
+    </g>
                           </g>
                         </svg>
                         </div>
@@ -329,8 +330,8 @@
         </div>
     </div>
 
-    <script src="i18n.js?v=ca4a62b414"></script>
-    <script src="contenido.js?v=ca4a62b414"></script>
-    <script src="app.js?v=ca4a62b414"></script>
+    <script src="i18n.js?v=f09ac6ca42"></script>
+    <script src="contenido.js?v=f09ac6ca42"></script>
+    <script src="app.js?v=f09ac6ca42"></script>
 </body>
 </html>

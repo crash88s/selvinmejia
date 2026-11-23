@@ -130,69 +130,68 @@
     }
 
     /* ----------------------------------------------------------- tarjetas */
+    const ICONO_SVC = {
+        packetlens: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M6.5 10.5h1.6l1.2-2.6 2 5.2 1.2-2.6h1.5"/></svg>',
+        aves: '<svg viewBox="0 0 24 24"><path d="M16 7.5a3 3 0 0 0-5.8 1.1L4 13.5c2.5 3 7 3.6 10 1.3A6.5 6.5 0 0 0 16.6 9"/><path d="m16 7.5 3.5 1-3 .9"/><path d="m9 17-1 3.5M12 17.2l.5 3.3"/></svg>',
+        secreto: '<svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="1.5"/><path d="M2.5 9h19M12 9v11.5"/><path d="M12 9c-1.5-3.5-5.5-4.5-5.5-1.8C6.5 9 12 9 12 9Zm0 0c1.5-3.5 5.5-4.5 5.5-1.8C17.5 9 12 9 12 9Z"/></svg>',
+        mired: '<svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9 14.2a4.3 4.3 0 0 1 6 0M10.6 16.4a2 2 0 0 1 2.8 0"/></svg>',
+    };
+    const FLECHA = '<svg class="flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+
     function vivoAves() {
-        if (!estado) return '<span class="skel" style="width:70%"></span><span class="skel" style="width:45%"></span>';
+        if (!estado) return '<span class="skel" style="width:70%"></span>';
         const a = estado.aves;
         const d = a && (a[lang] || a.es || a.en);
         if (!d || !d.hallazgo) return `<p class="nota">${esc(d && d.texto ? d.texto : t('aves.sinDatos'))}</p>`;
-        const rara = /rar/i.test(d.rareza || '');
-        return `<div class="k">${esc(t('aves.hallazgo'))}</div>
-            <div class="ave">
-                ${a.foto ? `<img src="${esc(a.foto)}" alt="${esc(d.hallazgo)}" loading="lazy" referrerpolicy="no-referrer">` : '<span></span>'}
-                <div><div class="nombre">${esc(d.hallazgo)}</div>${d.rareza ? `<span class="chip ${rara ? 'rara' : ''}">${esc(d.rareza)}</span>` : ''}</div>
-            </div>
-            <div class="row">
-                <div class="stat"><b>${num(d.especies)}</b><span>${esc(t('aves.especies'))}</span></div>
-                <div class="stat"><b>${num(d.detecciones)}</b><span>${esc(t('aves.detecciones'))}</span></div>
+        return `<div class="ave">
+                ${a.foto ? `<img src="${esc(a.foto)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
+                <div><span class="k">${esc(t('aves.hallazgo'))}</span><b>${esc(d.hallazgo)}</b>
+                <span class="sub">${d.rareza ? `<em>${esc(d.rareza)}</em> · ` : ''}${num(d.especies)} ${esc(t('aves.especies'))} · ${num(d.detecciones)} ${esc(t('aves.detecciones'))}</span></div>
             </div>`;
     }
     function vivoPacketlens() {
-        if (!estado) return '<span class="skel" style="width:50%"></span><span class="skel" style="width:70%"></span>';
+        if (!estado) return '<span class="skel" style="width:60%"></span>';
         const a = estado.packetlens;
         if (!a) return `<p class="nota">${esc(t('an.privado'))}</p>`;
-        return `<div class="big">${num(a.analisis30)}</div>
-            <div class="k">${esc(t('an.mes'))}</div>
-            <div class="row">
-                <div class="stat"><b>${num(a.analisisTotal)}</b><span>${esc(t('an.total'))}</span></div>
-                <div class="stat"><b>${num(a.visitas30)}</b><span>${esc(t('an.visitas'))}</span></div>
+        return `<div class="stats">
+                <div><b>${num(a.analisis30)}</b><span>${esc(t('an.mes'))}</span></div>
+                <div><b>${num(a.analisisTotal)}</b><span>${esc(t('an.total2'))}</span></div>
+                <div><b>${num(a.visitas30)}</b><span>${esc(t('an.visitas'))}</span></div>
             </div>`;
     }
     function vivoSecreto() {
         const d = diasNavidad();
-        const mes = Number(fechaGT().slice(5, 7));
-        const temporada = mes >= 11;
-        return `<div class="big">${d === 0 ? '🎄' : num(d)}</div>
-            <div class="k">${esc(d === 0 ? t('sec.hoy') : t('sec.faltan'))}</div>
-            <p class="nota">${esc(temporada ? t('sec.temporada') : t('sec.fuera'))}</p>`;
+        return `<div class="cuenta"><b>${d === 0 ? '🎄' : num(d)}</b><span>${esc(d === 0 ? t('sec.hoy') : t('sec.faltan'))}</span></div>`;
     }
     function vivoMired() {
         const st = svcEstado('mired');
-        const tun = !st ? '<span class="d">···</span>'
-            : st.ok ? `<b class="ok-t">${esc(t('mr.arriba'))}</b>` : `<b class="bad-t">${esc(t('mr.abajo'))}</b>`;
-        return `<div class="candado"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/><circle cx="12" cy="15.5" r="1.4"/></svg>
-            <div><div class="k">${esc(t('mr.titulo'))}</div><div class="kv">${esc(t('mr.tunel'))}: ${tun}</div></div></div>
-            <p class="nota">${esc(t('mr.nota'))}</p>`;
+        const txt = !st ? '···' : st.ok ? t('mr.arriba') : t('mr.abajo');
+        return `<div class="tunel ${st ? (st.ok ? 'ok' : 'bad') : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
+            <span>${esc(t('mr.tunel'))}: <b>${esc(txt)}</b></span></div>`;
     }
     const VIVO = { aves: vivoAves, packetlens: vivoPacketlens, secreto: vivoSecreto, mired: vivoMired };
 
     function renderCards() {
-        $('#cards').innerHTML = C.servicios.map((s) => {
+        $('#cards').innerHTML = C.servicios.map((s, i) => {
             const st = svcEstado(s.id);
             const e = !st ? 'cargando' : st.ok ? 'ok' : 'caido';
-            const etq = !st ? t('svc.revisando') : st.ok ? `${t('svc.operativo')} · ${st.ms} ms` : t('svc.caido');
+            const etq = !st ? t('svc.revisando') : st.ok ? `${st.ms} ms` : t('svc.caido');
             const enlace = s.privado ? s.url : `${s.url}${lang === 'en' ? (s.id === 'aves' ? '/en/' : '/?lang=en') : ''}`;
-            return `<article class="card${s.privado ? ' privado' : ''}" data-estado="${e}">
-                <div class="card-top"><span class="led ${e === 'ok' ? 'ok' : e === 'caido' ? 'bad' : ''}"></span>
-                    <span class="host">${esc(host(s.url))}</span><span class="est">${esc(etq)}</span></div>
-                <div class="card-body">
+            const destacado = i === 0;
+            return `<a class="svc c-${esc(s.color || 'azul')}${destacado ? ' destacado' : ''}" href="${esc(enlace)}" rel="noopener" data-estado="${e}">
+                <div class="svc-info">
+                    <div class="svc-head">
+                        <span class="svc-ico" aria-hidden="true">${ICONO_SVC[s.id] || ''}</span>
+                        <span class="svc-est" title="${esc(e === 'ok' ? t('svc.operativo') : etq)}"><span class="led ${e === 'ok' ? 'ok' : e === 'caido' ? 'bad' : ''}"></span>${esc(etq)}</span>
+                    </div>
                     <span class="tipo">${esc(L(s.tipo))}</span>
-                    <h3>${esc(L(s.nombre))}</h3>
+                    <h3>${esc(L(s.nombre))} ${FLECHA}</h3>
                     <p class="desc">${esc(L(s.desc))}</p>
-                    <div class="vivo">${(VIVO[s.id] || (() => ''))()}</div>
-                    <ul class="tags">${(s.etiquetas || []).map((x) => `<li>${esc(L(x))}</li>`).join('')}</ul>
+                    ${destacado ? `<ul class="tags">${(s.etiquetas || []).map((x) => `<li>${esc(L(x))}</li>`).join('')}</ul>` : ''}
                 </div>
-                <div class="card-foot"><a class="card-link" href="${esc(enlace)}" rel="noopener">${s.privado ? '🔒 ' : ''}${esc(t('svc.abrir'))} ${esc(L(s.nombre))} →</a></div>
-            </article>`;
+                <div class="svc-vivo">${(VIVO[s.id] || (() => ''))()}</div>
+                <div class="svc-pie mono">${s.privado ? '🔒 ' : ''}${esc(host(s.url))}</div>
+            </a>`;
         }).join('');
     }
 
