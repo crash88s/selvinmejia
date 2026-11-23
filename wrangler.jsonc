@@ -1,0 +1,29 @@
+{
+	// selvinmejia.com en Cloudflare Workers (mismo esquema que aves y PacketLens).
+	//   Probar en tu Mac:  bash publicar.sh --local   → http://localhost:8787
+	//   Publicar:          bash publicar.sh
+	"name": "selvinmejia",
+	"main": "src/index.js",
+	"compatibility_date": "2026-09-01",
+	"assets": {
+		"directory": ".", // la raíz del repo; lo que no es sitio está en .assetsignore
+		"binding": "ASSETS",
+		"run_worker_first": true // para /api/estado, la redirección de www y las cabeceras de seguridad
+	},
+	"workers_dev": false,
+	"routes": [
+		{ "pattern": "selvinmejia.com", "custom_domain": true },
+		{ "pattern": "www.selvinmejia.com", "custom_domain": true }
+	],
+	"observability": { "enabled": true },
+	// Conteos anónimos de PacketLens (la misma base D1, que conserva el nombre tshoot-datos). Aquí solo se LEEN.
+	// "remote": true hace que la vista local también lea los datos reales de Cloudflare.
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "tshoot-datos",
+			"database_id": "816a4172-cc52-4a8b-878f-a5e54fb819a9",
+			"remote": true
+		}
+	]
+}
