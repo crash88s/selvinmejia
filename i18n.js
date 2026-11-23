@@ -15,6 +15,7 @@ window.I18N = {
         'perfil.sub': 'Quince años entre redes, firewalls y centros de datos. La versión corta.',
         'perfil.stack': 'Stack del día a día',
         'perfil.tray': 'Trayectoria',
+        'perfil.destacados': 'Trabajo en producción',
         'apoyo.btn': 'Apoya los proyectos',
         'apoyo.pie': 'Gratis y sin anuncios, gracias a quienes los apoyan.',
         'apoyo.kicker': 'Apoya los proyectos',
@@ -83,6 +84,7 @@ window.I18N = {
         'banco.idea': 'idea',
         'banco.construyendo': 'construyendo',
         'banco.pruebas': 'en pruebas',
+        'banco.estudiando': 'estudiando',
 
         'pie.hecho': 'Hecho en Guatemala',
         'pie.apoyar': 'Apoyar los proyectos',
@@ -108,6 +110,7 @@ window.I18N = {
         'perfil.sub': 'Fifteen years of networks, firewalls and data centers. The short version.',
         'perfil.stack': 'Everyday stack',
         'perfil.tray': 'Career',
+        'perfil.destacados': 'Work in production',
         'apoyo.btn': 'Support the projects',
         'apoyo.pie': 'Free and ad-free, thanks to the people who support them.',
         'apoyo.kicker': 'Support the projects',
@@ -176,6 +179,7 @@ window.I18N = {
         'banco.idea': 'idea',
         'banco.construyendo': 'building',
         'banco.pruebas': 'testing',
+        'banco.estudiando': 'studying',
 
         'pie.hecho': 'Made in Guatemala',
         'pie.apoyar': 'Support the projects',

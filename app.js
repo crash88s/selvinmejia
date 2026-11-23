@@ -228,7 +228,7 @@
         $('#banco-lista').innerHTML = (C.banco || []).map((b) => `<li>
             <div class="fila"><h3>${esc(L(b.nombre))}</h3><span class="est ${esc(b.estado)}">${esc(t('banco.' + b.estado))}</span></div>
             <p>${esc(L(b.desc))}</p>
-            <div class="barra" role="progressbar" aria-valuenow="${b.progreso}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(L(b.nombre))}"><i style="width:${Math.max(0, Math.min(100, b.progreso))}%"></i></div>
+            ${Number.isFinite(b.progreso) ? `<div class="barra" role="progressbar" aria-valuenow="${b.progreso}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(L(b.nombre))}"><i style="width:${Math.max(0, Math.min(100, b.progreso))}%"></i></div>` : ''}
         </li>`).join('');
     }
 
@@ -245,14 +245,25 @@
             `<p><span class="p">$</span> <span class="cursor"></span></p>`;
         $('#perfil-tray').innerHTML = pf.trayectoria.map((x, i) => `<li class="${i === 0 ? 'hoy' : ''}">
             <span class="anios mono">${esc(L(x.anios))}</span><b>${esc(L(x.rol))}</b><span class="d">${esc(L(x.desc))}</span></li>`).join('');
+        $('#perfil-dest').innerHTML = (pf.destacados || []).map((d) => `<article class="dest">
+            <span class="dest-ico" aria-hidden="true">${ICONOS_DEST[d.id] || ''}</span><h3>${esc(L(d.titulo))}</h3><p>${esc(L(d.desc))}</p></article>`).join('');
         $('#perfil-stack').innerHTML = pf.stack.map((g) => `<div class="grupo g-${esc(g.id)}">
             <h3>${ICONOS[g.id] || ''}${esc(L(g.titulo))}</h3>
-            <ul>${g.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
+            <ul>${g.items.map((x) => `<li${x && x.curso ? ' class="curso"' : ''}>${esc(L(x))}</li>`).join('')}</ul></div>`).join('');
     }
+    const ICONOS_DEST = {
+        segmentacion: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+        firewall: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 4v5M15 9v5.5M9 14.5V20"/></svg>',
+        rural: '<svg viewBox="0 0 24 24"><path d="M12 21V11"/><path d="M8.5 7.5a5 5 0 0 1 7 0M6 5a8.5 8.5 0 0 1 12 0"/><circle cx="12" cy="10" r="1.4"/><path d="M8 21h8"/></svg>',
+        capacidad: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+        auditoria: '<svg viewBox="0 0 24 24"><path d="M9 4h6l1 2h3v14H5V6h3Z"/><path d="m9 13 2 2 4-4"/></svg>',
+        datacenter: '<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="6" rx="1.5"/><rect x="4" y="11" width="16" height="6" rx="1.5"/><path d="M8 6h.01M8 14h.01M4 21h16"/></svg>',
+    };
     const ICONOS = {
         seguridad: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6Z"/><path d="m9 12 2 2 4-4"/></svg>',
         redes: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2h12v2"/></svg>',
         monitoreo: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>',
+        infra: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="7" rx="1.5"/><rect x="4" y="14" width="16" height="7" rx="1.5"/><path d="M8 6.5h.01M8 17.5h.01"/></svg>',
         certs: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5"/><path d="m9 13.5-1.5 7.5 4.5-2.5 4.5 2.5-1.5-7.5"/></svg>',
     };
 

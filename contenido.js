@@ -23,6 +23,7 @@ window.CONTENIDO = {
                 ['en línea', 'desde 2011'],
                 ['enfoque', 'Firewalls de nueva generación, SD-WAN y alta disponibilidad'],
                 ['formación', 'Lic. en Tecnología y Administración de las Telecomunicaciones'],
+                ['estudiando', 'AWS Solutions Architect – Associate (SAA-C03)'],
                 ['fuera', 'Herramientas gratis, aves y café'],
             ],
             en: [
@@ -31,6 +32,7 @@ window.CONTENIDO = {
                 ['online', 'since 2011'],
                 ['focus', 'Next-generation firewalls, SD-WAN and high availability'],
                 ['degree', 'B.S. in Telecommunications Technology and Management'],
+                ['studying', 'AWS Solutions Architect – Associate (SAA-C03)'],
                 ['off hours', 'Free tools, birds and coffee'],
             ],
         },
@@ -38,17 +40,39 @@ window.CONTENIDO = {
             { anios: { es: '2025 — hoy', en: '2025 — now' }, rol: { es: 'Ingeniero Senior de Ciberseguridad', en: 'Senior Cybersecurity Engineer' },
               desc: { es: 'Hardening de firewalls de nueva generación y SD-WAN con failover automático.', en: 'Next-generation firewall hardening and SD-WAN with automatic failover.' } },
             { anios: { es: '2024 — 2025', en: '2024 — 2025' }, rol: { es: 'Coordinador de Infraestructura y Operaciones TI', en: 'IT Infrastructure and Operations Lead' },
-              desc: { es: 'Servidores, redes, almacenamiento y continuidad. Disponibilidad de red superior al 99.9 %.', en: 'Servers, networks, storage and continuity. Network availability above 99.9%.' } },
+              desc: { es: 'Presupuesto y planes de trabajo de infraestructura: servidores, HCI, respaldos, NAC, EDR y el traslado del centro de datos. Disponibilidad de red superior al 99.9 %.', en: 'Infrastructure budget and work plans: servers, HCI, backups, NAC, EDR and the data center move. Network availability above 99.9%.' } },
             { anios: { es: '2016 — 2024', en: '2016 — 2024' }, rol: { es: 'Técnico en Telecomunicaciones', en: 'Telecommunications Technician' },
-              desc: { es: 'Cisco, Meraki, FortiGate, enlaces Ubiquiti y las primeras SD-WAN.', en: 'Cisco, Meraki, FortiGate, Ubiquiti links and the first SD-WAN rollouts.' } },
+              desc: { es: 'Redes de plantas, fincas y oficinas en Guatemala y México: segmentación, migración a Fortinet, enlaces de microondas, Wi-Fi y las primeras SD-WAN.', en: 'Networks for plants, farms and offices in Guatemala and Mexico: segmentation, Fortinet migration, microwave links, Wi-Fi and the first SD-WAN rollouts.' } },
             { anios: { es: '2011 — 2016', en: '2011 — 2016' }, rol: { es: 'Seguridad e Infraestructura en Banca', en: 'Security and Infrastructure in Banking' },
               desc: { es: 'Firewall, proxy, IPS y monitoreo con PRTG para servicios a nivel nacional.', en: 'Firewall, proxy, IPS and PRTG monitoring for nationwide services.' } },
         ],
+        // Trabajo destacado (sin nombres de empresas ni datos internos)
+        destacados: [
+            { id: 'segmentacion', titulo: { es: 'Segmentación de red', en: 'Network segmentation' },
+              desc: { es: 'Del assessment a la implementación por fases, con switches Cisco y Meraki y pruebas de rutas en cada sede.', en: 'From assessment to phased rollout, with Cisco and Meraki switches and route testing at every site.' } },
+            { id: 'firewall', titulo: { es: 'Migración a Fortinet', en: 'Fortinet migration' },
+              desc: { es: 'Cambio de firewall, perfiles de navegación, VPN sitio a sitio, servicios publicados y registros en FortiAnalyzer.', en: 'Firewall replacement, web filtering profiles, site-to-site VPN, published services and FortiAnalyzer logging.' } },
+            { id: 'rural', titulo: { es: 'Conectividad en el campo', en: 'Rural connectivity' },
+              desc: { es: 'Enlaces de microondas Ubiquiti, Starlink y SD-WAN para llevar red a fincas, plantas y campamentos.', en: 'Ubiquiti microwave links, Starlink and SD-WAN to bring the network to farms, plants and camps.' } },
+            { id: 'capacidad', titulo: { es: 'Capacidad y redundancia', en: 'Capacity and redundancy' },
+              desc: { es: 'Estudios de capacidad mensuales y pruebas de redundancia programadas en cada sede, con PRTG como base.', en: 'Monthly capacity studies and scheduled redundancy tests at every site, built on PRTG.' } },
+            { id: 'auditoria', titulo: { es: 'Auditoría y hardening', en: 'Audit and hardening' },
+              desc: { es: 'Auditorías de TI, escaneo de vulnerabilidades, remediación de pruebas de ethical hacking, NAC y EDR.', en: 'IT audits, vulnerability scanning, ethical hacking remediation, NAC and EDR rollouts.' } },
+            { id: 'datacenter', titulo: { es: 'Centro de datos', en: 'Data center' },
+              desc: { es: 'Infraestructura hiperconvergente, respaldos con NetBackup, CMDB y el plan para trasladar el centro de datos.', en: 'Hyperconverged infrastructure, NetBackup backups, a CMDB and the plan to move the data center.' } },
+        ],
         stack: [
-            { id: 'seguridad', titulo: { es: 'Seguridad', en: 'Security' }, items: ['FortiGate', 'FortiManager', 'FortiAnalyzer', 'Palo Alto Networks', 'CrowdStrike', 'Netskope', 'Darktrace', 'Lumu', 'Forescout NAC'] },
-            { id: 'redes', titulo: { es: 'Redes', en: 'Networking' }, items: ['Cisco IOS', 'Cisco Meraki', 'SD-WAN', 'Ubiquiti PtP / PtMP'] },
-            { id: 'monitoreo', titulo: { es: 'Monitoreo', en: 'Monitoring' }, items: ['PRTG', 'OpManager', 'Wireshark', 'Aranda'] },
-            { id: 'certs', titulo: { es: 'Certificaciones', en: 'Certifications' }, items: ['Cisco CCNA R&S', 'Fortinet FortiOS 6.2', 'Ubiquiti UBWS · UBWA · UEWA'] },
+            { id: 'seguridad', titulo: { es: 'Seguridad', en: 'Security' },
+              items: ['FortiGate', 'FortiManager', 'FortiAnalyzer', 'Palo Alto Networks', 'Cisco ASA', 'CrowdStrike', 'Darktrace', 'Forescout NAC'] },
+            { id: 'redes', titulo: { es: 'Redes', en: 'Networking' },
+              items: ['Cisco IOS', 'Cisco Meraki', { es: 'Switches Dell', en: 'Dell switches' }, 'Fortinet SD-WAN', 'VMware VeloCloud', 'Ubiquiti PtP / PtMP', 'Ubiquiti UniFi · UISP', 'Starlink'] },
+            { id: 'infra', titulo: { es: 'Infraestructura', en: 'Infrastructure' },
+              items: ['VMware vSphere', { es: 'Hiperconvergencia (HCI)', en: 'Hyperconverged (HCI)' }, 'Veritas NetBackup', 'Active Directory', 'WSUS', 'Cisco Webex Room Kit'] },
+            { id: 'monitoreo', titulo: { es: 'Monitoreo', en: 'Monitoring' },
+              items: ['PRTG', 'SolarWinds', 'OpManager', 'Wireshark', 'Aranda'] },
+            { id: 'certs', titulo: { es: 'Certificaciones', en: 'Certifications' },
+              items: ['Cisco CCNA Routing & Switching', 'Cisco CCNA Wireless', 'Fortinet NSE 1 – 4', 'Fortinet FortiOS 6.2', 'Ubiquiti UBWS · UBWA · UEWA',
+                      { es: 'AWS SAA-C03 · en curso', en: 'AWS SAA-C03 · in progress', curso: true }] },
         ],
     },
 
@@ -101,6 +125,14 @@ window.CONTENIDO = {
     ],
 
     banco: [
+        {
+            nombre: { es: 'AWS Solutions Architect – Associate', en: 'AWS Solutions Architect – Associate' },
+            desc: {
+                es: 'Preparándome para el SAA-C03: llevar lo aprendido en redes y seguridad a la nube.',
+                en: 'Preparing for the SAA-C03: taking networking and security experience to the cloud.',
+            },
+            estado: 'estudiando',
+        },
         {
             nombre: { es: 'Próximo Proyecto', en: 'Next Project' },
             desc: {
