@@ -348,6 +348,7 @@
     try { JSON.parse(localStorage.getItem('sm.huevos') || '[]').forEach((x) => HUEVOS[x] && encontrados.add(x)); } catch (e) {}
     let toastT = null;
     function huevo(id) {
+        if (EFECTOS[id] && !matchMedia('(prefers-reduced-motion: reduce)').matches) EFECTOS[id]();
         if (!HUEVOS[id] || encontrados.has(id)) return;
         encontrados.add(id);
         try { localStorage.setItem('sm.huevos', JSON.stringify([...encontrados])); } catch (e) {}
@@ -357,7 +358,57 @@
         el.className = 'ver';
         clearTimeout(toastT);
         toastT = setTimeout(() => { el.className = ''; }, 3800);
+        contarHuevos();
     }
+    function contarHuevos() {
+        const c = $('#huevo-cuenta');
+        if (c) c.textContent = `${encontrados.size} / ${Object.keys(HUEVOS).length}`;
+        const b = $('#huevo-pie');
+        if (b) b.classList.toggle('alguno', encontrados.size > 0);
+    }
+
+    /* ---------- efectos visuales de cada huevo */
+    const capa = (clase, html = '', ms = 3000) => {
+        const el = document.createElement('div');
+        el.className = 'fx ' + clase;
+        el.setAttribute('aria-hidden', 'true');
+        el.innerHTML = html;
+        document.documentElement.appendChild(el);   // fuera de <body>: el destello del 88 usa filter en body
+        setTimeout(() => el.remove(), ms);
+        return el;
+    };
+    function lluviaEmoji(emojis, n = 26) {
+        const html = Array.from({ length: n }, () => {
+            const e = emojis[Math.floor(Math.random() * emojis.length)];
+            return `<i style="left:${Math.random() * 100}%;animation-delay:${(Math.random() * 1.2).toFixed(2)}s;animation-duration:${(1.8 + Math.random() * 1.6).toFixed(2)}s;font-size:${20 + Math.random() * 22}px">${e}</i>`;
+        }).join('');
+        capa('fx-lluvia', html, 4200);
+    }
+    const cruzar = (emoji, clase = '') => capa('fx-cruza ' + clase, `<i>${emoji}</i>`, 2600);
+    function bocadilloPollito(texto) {
+        const caja = $('.avatar-box');
+        if (!caja) return;
+        const b = document.createElement('span');
+        b.className = 'pio';
+        b.textContent = texto;
+        caja.appendChild(b);
+        setTimeout(() => b.remove(), 2200);
+    }
+    const EFECTOS = {
+        bttf: () => { capa('fx-estela', '<i></i><i></i>', 1800); capa('fx-88 mono', '88 MPH', 1800); },
+        rpo: () => lluviaEmoji(['🥚', '🥚', '🗝️', '🏆']),
+        spiderman: () => capa('fx-telarana', '<svg viewBox="0 0 200 200"><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M200 0 0 200M200 0 60 200M200 0 130 200M200 0 0 130M200 0 0 60M200 0 0 0"/><path d="M170 0q-4 26 30 30M130 0q-8 62 70 70M88 0q-12 100 112 112M45 0q-14 140 155 155"/></g></svg>', 4200),
+        ironman: () => capa('fx-hud', '<i></i><i></i><i></i><b class="mono">J.A.R.V.I.S. · ONLINE</b>', 3200),
+        avengers: () => lluviaEmoji(['⚡', '🛡️', '🔨', '💎', '🕷️']),
+        saw: () => capa('fx-saw', '<b class="mono">¿QUIERES JUGAR UN JUEGO?</b>'.replace('¿QUIERES JUGAR UN JUEGO?', ES() ? '¿QUIERES JUGAR UN JUEGO?' : 'DO YOU WANT TO PLAY A GAME?'), 2600),
+        rapido: () => cruzar('🏎️', 'rapido'),
+        tortugas: () => lluviaEmoji(['🍕', '🍕', '🐢']),
+        gadget: () => cruzar('🚁', 'gadget'),
+        pokemon: () => bocadilloPollito(ES() ? '¡Pío! ⚡' : 'Peep! ⚡'),
+        naruto: () => lluviaEmoji(['🍥', '🍜', '🍥'], 20),
+        dbz: () => capa('fx-rayo', '<i></i>', 1600),
+        deathnote: () => capa('fx-manzana', '<i>🍎</i>', 2600),
+    };
 
     // Lluvia de Matrix en toda la página (unos segundos)
     function lluviaMatrix(ms = 6000) {
@@ -394,9 +445,42 @@
         if (kIdx === KONAMI.length) {
             kIdx = 0;
             huevo('rpo');
-            lluviaMatrix(2500);
         }
     });
+
+    // Pokémon: clic al pollito
+    const pollito = $('.avatar .av-ave');
+    if (pollito) {
+        pollito.style.cursor = 'pointer';
+        pollito.addEventListener('click', (e) => { e.stopPropagation(); huevo('pokemon'); if (encontrados.has('pokemon')) bocadilloPollito(ES() ? '¡Pío!' : 'Peep!'); });
+    }
+
+    // Códigos escritos en cualquier parte de la página (sin abrir la terminal)
+    const CODIGOS = { matrix: 'matrix', delorean: 'bttf', morph: 'rangers', cowabunga: 'tortugas', jarvis: 'ironman', kamehameha: 'dbz', dattebayo: 'naruto', pikachu: 'pokemon', avengers: 'avengers', jigsaw: 'saw', gadget: 'gadget', spidey: 'spiderman', ryuk: 'deathnote', toretto: 'rapido' };
+    let tecleo = '';
+    document.addEventListener('keydown', (e) => {
+        if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || '') || e.metaKey || e.ctrlKey || e.key.length !== 1) return;
+        tecleo = (tecleo + e.key.toLowerCase()).slice(-12);
+        for (const [palabra, id] of Object.entries(CODIGOS)) {
+            if (tecleo.endsWith(palabra)) {
+                tecleo = '';
+                if (id === 'matrix') lluviaMatrix();
+                if (id === 'rangers') { root.classList.add('ranger'); setTimeout(() => root.classList.remove('ranger'), 3200); }
+                if (id === 'bttf') { document.body.classList.add('flash'); setTimeout(() => document.body.classList.remove('flash'), 700); }
+                huevo(id);
+            }
+        }
+    });
+
+    // Pistas discretas
+    const reloj = $('#reloj');
+    if (reloj) reloj.title = '88 mph → delorean';
+    const av = $('.avatar');
+    if (av) av.addEventListener('mouseenter', () => { av.querySelector('title').textContent = ES() ? 'Sigue al pollito blanco… (5 clics)' : 'Follow the white chick… (5 clicks)'; }, { once: true });
+    try {
+        console.log('%c🥚 ¿Curioseando el código? Hay 15 huevos de pascua escondidos.\n%cAbre la terminal con ` y escribe: huevos\n…o prueba el código Konami. ↑↑↓↓←→←→BA',
+            'font: 600 14px system-ui; color: #fbbf24', 'font: 13px ui-monospace, monospace; color: #22d3ee');
+    } catch (e) {}
 
     // Matrix: cinco clics al avatar
     let clicsAvatar = 0, clicsT = null;
@@ -723,6 +807,8 @@
     /* -------------------------------------------------------------- inicio */
     $('#anio').textContent = fechaGT().slice(0, 4);
     aplicarIdioma();
+    contarHuevos();
+    $('#huevo-pie').addEventListener('click', () => { abrirTerm(); setTimeout(() => ejecutar('huevos'), 60); });
     cargarEstado();
     setInterval(tic, 1000);
     setInterval(() => { if (!document.hidden) cargarEstado(); }, REFRESCO);

@@ -443,6 +443,40 @@ body.flash { animation: flash88 0.7s ease-out; }
 html.ranger body { animation: ranger 3.2s steps(5) 1; }
 @keyframes ranger { 0% { filter: hue-rotate(0deg); } 20% { filter: hue-rotate(140deg); } 40% { filter: hue-rotate(220deg); } 60% { filter: hue-rotate(300deg); } 80% { filter: hue-rotate(60deg); } 100% { filter: none; } }
 
+/* efectos visuales */
+.fx { position: fixed; inset: 0; z-index: 76; pointer-events: none; overflow: hidden; }
+.fx-lluvia i { position: absolute; top: -60px; font-style: normal; animation: cae linear forwards; }
+@keyframes cae { to { transform: translateY(calc(100vh + 120px)) rotate(240deg); } }
+.fx-cruza i { position: absolute; top: 62%; left: -120px; font-size: 64px; font-style: normal; animation: cruza 2.2s cubic-bezier(.5, 0, .3, 1) forwards; }
+.fx-cruza.gadget i { top: 30%; animation-name: vuela; animation-duration: 2.5s; }
+.fx-cruza.rapido i { transform: scaleX(-1); filter: drop-shadow(-40px 0 6px rgba(56, 189, 248, .5)); }
+@keyframes cruza { to { left: calc(100% + 140px); } }
+@keyframes vuela { 0% { left: -120px; transform: translateY(80px) rotate(-8deg); } 50% { transform: translateY(-40px) rotate(6deg); } 100% { left: calc(100% + 140px); transform: translateY(20px); } }
+.fx-estela i { position: absolute; left: -10%; height: 6px; width: 60%; border-radius: 6px; background: linear-gradient(90deg, transparent, #fb923c, #fde68a); box-shadow: 0 0 18px #fb923c; animation: estela 1.2s ease-out forwards; }
+.fx-estela i:first-child { top: 78%; } .fx-estela i:last-child { top: 82%; animation-delay: .06s; }
+@keyframes estela { from { transform: translateX(-60%); opacity: 1; } to { transform: translateX(200%); opacity: 0; } }
+.fx-88 { display: grid; place-items: center; font-size: clamp(60px, 14vw, 180px); font-weight: 700; color: #fb923c; text-shadow: 0 0 30px rgba(251, 146, 60, .7); animation: aparece88 1.8s ease-out forwards; }
+@keyframes aparece88 { 0% { opacity: 0; transform: scale(.6); } 25% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.3); } }
+.fx-telarana svg { position: absolute; top: 0; right: 0; width: min(46vw, 420px); color: rgba(226, 232, 240, .55); animation: tela 4.2s ease forwards; transform-origin: top right; }
+@keyframes tela { 0% { opacity: 0; transform: scale(.4); } 15%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+.fx-hud { display: grid; place-items: center; }
+.fx-hud i { position: absolute; width: 260px; height: 260px; border-radius: 50%; border: 2px dashed rgba(56, 189, 248, .8); box-shadow: 0 0 30px rgba(56, 189, 248, .35), inset 0 0 30px rgba(56, 189, 248, .25); animation: hud 3.2s ease forwards; }
+.fx-hud i:nth-child(2) { width: 200px; height: 200px; border-style: solid; border-width: 1px; animation-direction: reverse; }
+.fx-hud i:nth-child(3) { width: 330px; height: 330px; border-width: 1px; border-style: dotted; }
+.fx-hud b { position: absolute; margin-top: 390px; color: #38bdf8; font-size: 14px; letter-spacing: .3em; animation: aparece88 3.2s ease forwards; }
+@keyframes hud { 0% { opacity: 0; transform: scale(.5) rotate(0); } 20%, 75% { opacity: 1; transform: scale(1) rotate(90deg); } 100% { opacity: 0; transform: scale(1.1) rotate(180deg); } }
+.fx-saw { display: grid; place-items: center; box-shadow: inset 0 0 180px 40px rgba(120, 0, 0, .85); animation: saw 2.6s ease forwards; }
+.fx-saw b { color: #fecaca; font-size: clamp(18px, 3vw, 30px); letter-spacing: .12em; text-shadow: 0 0 12px #b91c1c; }
+@keyframes saw { 0%, 100% { opacity: 0; } 10%, 22%, 34% { opacity: 1; } 16%, 28% { opacity: .35; } 80% { opacity: 1; } }
+.fx-rayo i { position: absolute; top: 48%; left: 0; height: 26px; width: 100%; border-radius: 20px; background: linear-gradient(90deg, #e0f2fe, #38bdf8 30%, #0ea5e9); box-shadow: 0 0 40px 12px rgba(56, 189, 248, .7); transform-origin: left; animation: rayo 1.6s ease-out forwards; }
+@keyframes rayo { 0% { transform: scaleX(0); opacity: 1; } 35% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1) scaleY(.1); opacity: 0; } }
+.fx-manzana i { position: absolute; top: -90px; left: 50%; font-size: 72px; font-style: normal; animation: manzana 2.6s cubic-bezier(.5, 0, .7, 1) forwards; }
+@keyframes manzana { 0% { transform: translate(-50%, 0) rotate(0); } 70% { transform: translate(-50%, 55vh) rotate(25deg); } 80% { transform: translate(-50%, 50vh) rotate(18deg); } 100% { transform: translate(-50%, 56vh) rotate(25deg); opacity: 0; } }
+.pio { position: absolute; top: -6px; left: -14px; padding: 4px 10px; border-radius: 12px 12px 12px 2px; background: #ffd23f; color: #3b2a00; font: 700 13px var(--sans); box-shadow: 0 6px 16px -6px rgba(0, 0, 0, .5); animation: pio 2.2s ease forwards; }
+@keyframes pio { 0% { opacity: 0; transform: translateY(8px) scale(.8); } 15%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-6px); } }
+.huevo-pie { margin-left: 10px; border: 1px dashed var(--border-strong); background: transparent; color: var(--muted); font-size: 12px; padding: 3px 10px; border-radius: 999px; cursor: pointer; opacity: .55; transition: opacity .2s, border-color .2s, color .2s; }
+.huevo-pie:hover, .huevo-pie.alguno { opacity: 1; color: var(--amber); border-color: color-mix(in srgb, var(--amber) 50%, transparent); }
+
 /* ------------------------------------------------------------ responsive */
 @media (max-width: 980px) {
     .hero-in { grid-template-columns: 1fr; gap: 40px; padding: 60px 0; }
