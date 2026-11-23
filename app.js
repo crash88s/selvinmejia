@@ -10,6 +10,36 @@
     const TZ = 'America/Guatemala';
     const REFRESCO = 60_000;
 
+    /* Conteos anónimos para el panel (/panel): sin IPs ni datos personales.
+       Si el navegador pide no rastrear, no se cuenta nada. */
+    const NO_CONTAR = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1' || location.protocol === 'file:';
+    function evento(tipo, detalle = '', extra = {}) {
+        if (NO_CONTAR) return;
+        try {
+            const body = JSON.stringify({ t: tipo, d: detalle, ...extra });
+            if (navigator.sendBeacon) navigator.sendBeacon('/api/evento', new Blob([body], { type: 'text/plain' }));
+            else fetch('/api/evento', { method: 'POST', body, keepalive: true }).catch(() => {});
+        } catch (e) { /* sin conteo */ }
+    }
+    function origenVisita() {
+        let r = '';
+        try {
+            const q = new URLSearchParams(location.search);
+            r = (q.get('ref') || q.get('utm_source') || '').toLowerCase();
+            if (r) {
+                q.delete('ref'); q.delete('utm_source'); q.delete('utm_medium'); q.delete('utm_campaign');
+                history.replaceState(null, '', `${location.pathname}${q.toString() ? `?${q}` : ''}${location.hash}`);
+            }
+            if (!r && document.referrer) r = new URL(document.referrer).hostname.toLowerCase();
+        } catch (e) { /* sin origen */ }
+        if (!r) return 'directo';
+        const M = [[/linkedin|lnkd/, 'linkedin'], [/facebook|^fb$|(^|\.)fb\./, 'facebook'], [/instagram/, 'instagram'], [/twitter|^x$|(^|\.)x\.com$|(^|\.)t\.co$/, 'x'],
+            [/google/, 'google'], [/bing/, 'bing'], [/duckduckgo/, 'duckduckgo'], [/whatsapp|wa\.me/, 'whatsapp'], [/github/, 'github'],
+            [/youtube|youtu\.be/, 'youtube'], [/tiktok/, 'tiktok'], [/reddit/, 'reddit'], [/selvinmejia\.com$/, 'sitio']];
+        for (const [re, k] of M) if (re.test(r)) return k;
+        return 'otro';
+    }
+
     let lang = root.lang === 'en' ? 'en' : 'es';
     let estado = null;        // última respuesta de /api/estado
     let estadoError = false;
@@ -46,6 +76,7 @@
     function cambiarIdioma(nuevo) {
         lang = nuevo === 'en' ? 'en' : 'es';
         try { localStorage.setItem('sm.lang', lang); } catch (e) {}
+        evento('idioma', lang);
         const u = new URL(location.href);
         if (u.searchParams.has('lang')) { u.searchParams.set('lang', lang); history.replaceState(null, '', u); }
         aplicarIdioma();
@@ -58,6 +89,7 @@
         root.dataset.theme = tema;
         $('meta[name="theme-color"]').setAttribute('content', tema === 'dark' ? '#07090d' : '#f5f7fa');
         try { localStorage.setItem('sm.theme', tema); } catch (e) {}
+        evento('tema', tema);
     }
     $('#tema').addEventListener('click', () => cambiarTema());
 
@@ -182,7 +214,7 @@
             const etq = !st ? t('svc.revisando') : st.ok ? `${st.ms} ms` : t('svc.caido');
             const enlace = s.privado ? s.url : `${s.url}${lang === 'en' ? (s.id === 'aves' ? '/en/' : '/?lang=en') : ''}`;
             const destacado = i === 0;
-            return `<a class="svc c-${esc(s.color || 'azul')}${destacado ? ' destacado' : ''}" href="${esc(enlace)}" rel="noopener" data-estado="${e}">
+            return `<a class="svc c-${esc(s.color || 'azul')}${destacado ? ' destacado' : ''}" href="${esc(enlace)}" rel="noopener" data-estado="${e}" data-id="${esc(s.id)}">
                 <div class="svc-info">
                     <div class="svc-head">
                         <span class="svc-ico" aria-hidden="true">${ICONO_SVC[s.id] || ''}</span>
@@ -300,9 +332,10 @@
     $$('.monto', apoyo).forEach((a) => {
         const m = a.dataset.monto;
         a.href = m === 'otro' ? C.apoyar : `${C.apoyar}/${m}USD`;
-        a.addEventListener('click', () => { $('#apoyo-gracias').hidden = false; });
+        a.addEventListener('click', () => { $('#apoyo-gracias').hidden = false; evento('donar_clic', m); });
     });
-    function abrirApoyo() {
+    function abrirApoyo(desde) {
+        evento('donar_ver', typeof desde === 'string' ? desde : 'pie');
         focoApoyo = document.activeElement;
         $('#apoyo-gracias').hidden = true;
         apoyo.hidden = false;
@@ -313,7 +346,7 @@
         if (!term.hidden) input.focus();
         else if (focoApoyo && focoApoyo.focus) focoApoyo.focus();
     }
-    $$('[data-apoyo]').forEach((b) => b.addEventListener('click', abrirApoyo));
+    $$('[data-apoyo]').forEach((b) => b.addEventListener('click', () => abrirApoyo(b.dataset.apoyo || 'pie')));
     $('[data-cerrar]', apoyo).addEventListener('click', cerrarApoyo);
     apoyo.addEventListener('click', (e) => { if (e.target === apoyo) cerrarApoyo(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !apoyo.hidden) { e.stopImmediatePropagation(); cerrarApoyo(); } }, true);
@@ -344,6 +377,7 @@
         if (EFECTOS[id] && !matchMedia('(prefers-reduced-motion: reduce)').matches) EFECTOS[id]();
         if (!HUEVOS[id] || encontrados.has(id)) return;
         encontrados.add(id);
+        evento('huevo', id);
         try { localStorage.setItem('sm.huevos', JSON.stringify([...encontrados])); } catch (e) {}
         let el = $('#toast');
         if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
@@ -502,8 +536,9 @@
     const espera = (ms) => new Promise((r) => setTimeout(r, ms));
     const svcPorNombre = (n) => C.servicios.find((s) => s.id === n || host(s.url) === n || host(s.url).split('.')[0] === n);
 
-    function abrirTerm() {
+    function abrirTerm(como) {
         if (!term.hidden) return;
+        evento('terminal', como === 'tecla' ? 'tecla' : 'boton');
         focoPrevio = document.activeElement;
         term.hidden = false;
         document.body.style.overflow = 'hidden';
@@ -519,12 +554,12 @@
         document.body.style.overflow = '';
         if (focoPrevio && focoPrevio.focus) focoPrevio.focus();
     }
-    $$('[data-term-open]').forEach((b) => b.addEventListener('click', abrirTerm));
+    $$('[data-term-open]').forEach((b) => b.addEventListener('click', () => abrirTerm('boton')));
     $('#term-x').addEventListener('click', cerrarTerm);
     term.addEventListener('click', (e) => { if (e.target === term) cerrarTerm(); });
     document.addEventListener('keydown', (e) => {
         const enCampo = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '') && document.activeElement !== input;
-        if ((e.key === '`' || e.key === '~') && term.hidden && !enCampo) { e.preventDefault(); abrirTerm(); }
+        if ((e.key === '`' || e.key === '~') && term.hidden && !enCampo) { e.preventDefault(); abrirTerm('tecla'); }
         else if (e.key === 'Escape' && !term.hidden) cerrarTerm();
     });
 
@@ -536,13 +571,13 @@
                 ['ping <servicio>', 'ping a ' + C.servicios.map((x) => x.id).join(', ')], ['traceroute selvin', 'la ruta hasta mí'],
                 ['open <servicio>', 'abre un proyecto'], ['aves', 'el hallazgo del día'], ['clima', 'el clima en Ciudad de Guatemala'],
                 ['date', 'fecha y hora en Guatemala'], ['uptime', 'cuánto llevamos en línea'], ['lang es|en', 'cambia el idioma'],
-                ['theme dark|light', 'cambia el tema'], ['apoyar', 'invítame un café'], ['history', 'comandos que escribiste'], ['clear', 'limpia la pantalla'], ['exit', 'cierra la terminal'],
+                ['theme dark|light', 'cambia el tema'], ['apoyar', 'invítame un café'], ['contacto', 'mi correo'], ['history', 'comandos que escribiste'], ['clear', 'limpia la pantalla'], ['exit', 'cierra la terminal'],
             ] : [
                 ['whoami', 'who I am'], ['ls', 'list services'], ['status', 'live status of everything'],
                 ['ping <service>', 'ping ' + C.servicios.map((x) => x.id).join(', ')], ['traceroute selvin', 'the route to me'],
                 ['open <service>', 'open a project'], ['birds', 'find of the day'], ['weather', 'weather in Guatemala City'],
                 ['date', 'date and time in Guatemala'], ['uptime', 'how long the site has been up'], ['lang es|en', 'switch language'],
-                ['theme dark|light', 'switch theme'], ['support', 'buy me a coffee'], ['history', 'commands you typed'], ['clear', 'clear the screen'], ['exit', 'close the terminal'],
+                ['theme dark|light', 'switch theme'], ['support', 'buy me a coffee'], ['contact', 'my email'], ['history', 'commands you typed'], ['clear', 'clear the screen'], ['exit', 'close the terminal'],
             ];
             linea(filas.map(([c, d]) => `  <span class="c">${esc(c.padEnd(20))}</span><span class="d">${esc(d)}</span>`).join('\n'));
             linea(`\n<span class="w">🥚 ${ES() ? 'Hay huevos de pascua escondidos en este sitio. Escribe' : 'There are easter eggs hidden on this site. Type'}</span> <span class="c">${ES() ? 'huevos' : 'eggs'}</span>`);
@@ -667,7 +702,12 @@
             huevo('spiderman');
         },
         echo(args) { linea(esc(args.join(' '))); },
-        apoyar() { linea(`<span class="v">♥</span> ${esc(t('apoyo.titulo'))}`); abrirApoyo(); },
+        contacto() {
+            const c = correo();
+            linea(`${ES() ? '¿Una consulta, una idea o un proyecto? Escríbeme:' : 'A question, an idea or a project? Write to me:'}\n<a href="mailto:${c}">${c}</a>`);
+            evento('contacto', 'terminal');
+        },
+        apoyar() { linea(`<span class="v">♥</span> ${esc(t('apoyo.titulo'))}`); abrirApoyo('terminal'); },
         rm(args) {
             if (!args.join(' ').includes('-rf')) return linea(`<span class="e">rm: ${ES() ? 'permiso denegado' : 'permission denied'}</span>`);
             linea(`<span class="v">📓 ${ES() ? 'Escribiste un nombre en la Death Note… pero era un directorio. Ryuk se ríe. Permiso denegado.' : 'You wrote a name in the Death Note… but it was a directory. Ryuk laughs. Permission denied.'}</span>`);
@@ -760,7 +800,7 @@
         eggs: 'huevos', easter: 'huevos', spiderman: 'sudo', spidey: 'sudo', kira: 'rm', ryuk: 'rm',
     });
 
-    const ALIAS = { '?': 'help', ayuda: 'help', servicios: 'ls', services: 'ls', estado: 'status', birds: 'aves', weather: 'clima', fecha: 'date', abrir: 'open', tema: 'theme', idioma: 'lang', cls: 'clear', donate: 'apoyar', support: 'apoyar', donar: 'apoyar', salir: 'exit', quit: 'exit', about: 'whoami', 'cat': 'whoami', tracert: 'traceroute' };
+    const ALIAS = { '?': 'help', ayuda: 'help', servicios: 'ls', services: 'ls', estado: 'status', birds: 'aves', weather: 'clima', fecha: 'date', abrir: 'open', tema: 'theme', idioma: 'lang', cls: 'clear', mail: 'contacto', email: 'contacto', correo: 'contacto', contact: 'contacto', donate: 'apoyar', support: 'apoyar', donar: 'apoyar', salir: 'exit', quit: 'exit', about: 'whoami', 'cat': 'whoami', tracert: 'traceroute' };
 
     async function ejecutar(texto) {
         const limpio = texto.trim();
@@ -771,6 +811,7 @@
         const [cmd, ...args] = limpio.split(/\s+/);
         const nombre = ALIAS[cmd.toLowerCase()] || ALIAS_EXTRA[cmd.toLowerCase()] || cmd.toLowerCase();
         const fn = COMANDOS[nombre];
+        evento('comando', fn ? nombre.replace(/[^a-z0-9_]/g, '').slice(0, 24) : 'desconocido');
         if (!fn) return linea(`<span class="e">${esc(cmd)}: ${ES() ? 'comando no encontrado. Escribe' : 'command not found. Type'} </span><span class="c">help</span>`);
         input.disabled = true;
         try { await fn(args); } finally { input.disabled = false; if (!term.hidden) input.focus(); }
@@ -797,10 +838,42 @@
         else if (e.key === 'l' && e.ctrlKey) { e.preventDefault(); out.innerHTML = ''; }
     });
 
+    /* ----------------------------------------------------------- contacto */
+    // El correo se arma en el navegador (menos spam de robots que leen el HTML)
+    const correo = () => ['info', 'selvinmejia.com'].join('@');
+    function pintarContacto() {
+        const c = correo();
+        $$('[data-correo]').forEach((a) => { a.href = `mailto:${c}`; a.querySelector('[data-correo-txt]') ? (a.querySelector('[data-correo-txt]').textContent = c) : (a.textContent = c); });
+    }
+    $$('[data-correo]').forEach((a) => a.addEventListener('click', () => evento('contacto', 'correo')));
+    const copiar = $('#copiar-correo');
+    if (copiar) copiar.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(correo()); } catch (e) { return; }
+        copiar.classList.add('ok');
+        copiar.querySelector('span').textContent = t('contacto.copiado');
+        evento('contacto', 'copiar');
+        setTimeout(() => { copiar.classList.remove('ok'); copiar.querySelector('span').textContent = t('contacto.copiar'); }, 1800);
+    });
+    $('#cards').addEventListener('click', (e) => {
+        const a = e.target.closest('a.svc');
+        if (a && a.dataset.id) evento('proyecto', a.dataset.id);
+    });
+
     /* -------------------------------------------------------------- inicio */
     $('#anio').textContent = fechaGT().slice(0, 4);
     aplicarIdioma();
+    pintarContacto();
     contarHuevos();
+    {
+        let nueva = true, vuelve = 0;
+        try {
+            nueva = !sessionStorage.getItem('sm.v');
+            sessionStorage.setItem('sm.v', '1');
+            vuelve = localStorage.getItem('sm.visto') ? 1 : 0;
+            localStorage.setItem('sm.visto', '1');
+        } catch (e) { /* modo privado */ }
+        if (nueva) evento('visita', lang, { o: origenVisita(), r: vuelve, th: root.dataset.theme });
+    }
     $('#huevo-pie').addEventListener('click', () => { abrirTerm(); setTimeout(() => ejecutar('huevos'), 60); });
     cargarEstado();
     setInterval(tic, 1000);

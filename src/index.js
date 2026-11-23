@@ -4,6 +4,10 @@
 //   de aves.selvinmejia.com, los conteos anónimos de PacketLens (base D1 tshoot-datos, solo lectura)
 //   (mired es privado: solo se revisa que el túnel responda) y el clima de Ciudad de Guatemala (Open-Meteo). Se guarda 60 s en la caché de Cloudflare.
 // - www.selvinmejia.com redirige (301) a selvinmejia.com.
+// - POST /api/evento: conteos anónimos del sitio (visitas, clics, terminal, huevos…) en la base D1 propia (DATOS).
+// - /panel: panel privado con "Iniciar sesión con Google" (solo ADMIN_EMAIL). Se configura con configurar-panel.sh.
+
+import { paginaEntrar, paginaPanel } from './panel.js';
 
 const CANONICO = 'selvinmejia.com';
 const CACHE_SEG = 60;
@@ -228,6 +232,246 @@ async function apiEstado(request, env, ctx) {
     return res;
 }
 
+
+/* =============================================================== conteos anónimos (D1: DATOS)
+   conteo:   un contador por día, tipo y detalle (sin datos personales, sin IPs)
+   donacion: las donaciones que registras a mano desde el panel */
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+const hoy = (ms = Date.now()) => new Date(ms - 6 * 3600e3).toISOString().slice(0, 10);
+const corta = (v, n = 600) => String(v ?? '').replace(/[\u0000-\u001f]+/g, ' ').slice(0, n);
+const numero = (v, d) => { const n = parseInt(v, 10); return Number.isFinite(n) && n >= 0 ? n : d; };
+const jsonR = (obj, status = 200, extra = {}) => new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...extra } });
+
+let tablasListas = false;
+async function tablas(db) {
+    if (tablasListas) return;
+    await db.batch([
+        db.prepare("CREATE TABLE IF NOT EXISTS conteo (dia TEXT NOT NULL, tipo TEXT NOT NULL, detalle TEXT NOT NULL DEFAULT '', n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (dia, tipo, detalle))"),
+        db.prepare("CREATE TABLE IF NOT EXISTS donacion (id INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT NOT NULL, monto REAL NOT NULL, moneda TEXT NOT NULL DEFAULT 'USD', nombre TEXT, nota TEXT, creado TEXT NOT NULL)"),
+    ]);
+    tablasListas = true;
+}
+const SQL_CONTAR = 'INSERT INTO conteo (dia, tipo, detalle, n) VALUES (?1, ?2, ?3, ?4) ON CONFLICT (dia, tipo, detalle) DO UPDATE SET n = n + ?4';
+async function contarVarios(env, lista) {
+    if (!env.DATOS || !lista.length) return;
+    await tablas(env.DATOS);
+    const dia = hoy();
+    await env.DATOS.batch(lista.map(([tipo, detalle, cuanto]) => env.DATOS.prepare(SQL_CONTAR).bind(dia, tipo, detalle || '', cuanto ?? 1)));
+}
+
+function origenValido(request) {
+    const origin = request.headers.get('Origin');
+    if (!origin) return true;
+    try {
+        const h = new URL(origin).hostname;
+        return h === CANONICO || h === `www.${CANONICO}` || h === 'localhost' || h === '127.0.0.1';
+    } catch { return false; }
+}
+
+// tipo → detalles permitidos (null = cualquier palabra corta en minúsculas)
+const EVENTOS = {
+    visita: new Set(['es', 'en']),
+    proyecto: new Set(['packetlens', 'aves', 'secreto', 'mired']),
+    terminal: new Set(['', 'boton', 'tecla']),
+    comando: null,
+    huevo: null,
+    contacto: new Set(['correo', 'copiar', 'terminal']),
+    donar_ver: new Set(['cabecera', 'pie', 'terminal']),
+    donar_clic: new Set(['3', '5', '10', 'otro']),
+    idioma: new Set(['es', 'en']),
+    tema: new Set(['dark', 'light']),
+};
+const ORIGENES = new Set(['directo', 'linkedin', 'facebook', 'instagram', 'x', 'google', 'bing', 'duckduckgo', 'whatsapp', 'github', 'youtube', 'tiktok', 'reddit', 'sitio', 'otro']);
+const ES_BOT = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|embedly|python|curl|wget|monitor|uptime/i;
+function dispositivo(ua) {
+    if (/iPad|Tablet|PlayBook|Silk|Android(?!.*Mobile)/i.test(ua)) return 'tablet';
+    if (/Mobi|iPhone|iPod|Android|Windows Phone/i.test(ua)) return 'movil';
+    return 'escritorio';
+}
+function navegador(ua) {
+    if (/Edg\//.test(ua)) return 'edge';
+    if (/OPR\/|Opera/.test(ua)) return 'opera';
+    if (/SamsungBrowser/.test(ua)) return 'samsung';
+    if (/Firefox\/|FxiOS/.test(ua)) return 'firefox';
+    if (/Chrome\/|CriOS/.test(ua)) return 'chrome';
+    if (/Safari\//.test(ua)) return 'safari';
+    return 'otro';
+}
+function sistema(ua) {
+    if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+    if (/Android/.test(ua)) return 'android';
+    if (/Windows/.test(ua)) return 'windows';
+    if (/Mac OS X|Macintosh/.test(ua)) return 'macos';
+    if (/Linux|CrOS/.test(ua)) return 'linux';
+    return 'otro';
+}
+async function evento(request, env) {
+    if (request.method !== 'POST') return jsonR({ error: 'method' }, 405);
+    if (!origenValido(request)) return jsonR({ error: 'origin' }, 403);
+    if (env.LIMITE_EVENTOS) {
+        const { success } = await env.LIMITE_EVENTOS.limit({ key: request.headers.get('CF-Connecting-IP') || 'anon' });
+        if (!success) return new Response(null, { status: 204 });
+    }
+    const texto = await request.text();
+    if (texto.length > 512) return jsonR({ error: 'size' }, 413);
+    let d;
+    try { d = JSON.parse(texto); } catch { return jsonR({ error: 'json' }, 400); }
+    const tipo = String(d.t || '');
+    const detalle = String(d.d || '').toLowerCase();
+    if (!(tipo in EVENTOS) || !/^[a-z0-9_]{0,24}$/.test(detalle)) return jsonR({ error: 'tipo' }, 400);
+    if (EVENTOS[tipo] && !EVENTOS[tipo].has(detalle)) return jsonR({ error: 'detalle' }, 400);
+    const ua = request.headers.get('User-Agent') || '';
+    if (ES_BOT.test(ua)) return new Response(null, { status: 204 });
+    const lista = [[tipo, detalle]];
+    if (tipo === 'visita') {
+        const pais = String(request.cf?.country || 'xx').toLowerCase();
+        lista.push(['pais', /^[a-z0-9]{2}$/.test(pais) ? pais : 'xx']);
+        lista.push(['disp', dispositivo(ua)]);
+        lista.push(['nav', navegador(ua)]);
+        lista.push(['so', sistema(ua)]);
+        lista.push(['hora', String(new Date(Date.now() - 6 * 3600e3).getUTCHours()).padStart(2, '0')]);
+        const o = String(d.o || '').toLowerCase();
+        lista.push(['origen', ORIGENES.has(o) ? o : 'otro']);
+        lista.push(['visitante', d.r === 1 ? 'vuelve' : 'nuevo']);
+        lista.push(['tema_ini', d.th === 'light' ? 'light' : 'dark']);
+    }
+    await contarVarios(env, lista);
+    return new Response(null, { status: 204 });
+}
+
+/* =============================================================== panel privado con Google */
+const b64url = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const desdeB64url = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(s.length / 4) * 4, '=')), (c) => c.charCodeAt(0));
+let clavesGoogle = null, clavesVencen = 0;
+async function clavesDeGoogle(forzar) {
+    if (!forzar && clavesGoogle && Date.now() < clavesVencen) return clavesGoogle;
+    const r = await fetch('https://www.googleapis.com/oauth2/v3/certs');
+    const j = await r.json();
+    const edad = /max-age=(\d+)/.exec(r.headers.get('cache-control') || '');
+    clavesGoogle = j.keys || [];
+    clavesVencen = Date.now() + (edad ? Number(edad[1]) * 1000 : 3600e3);
+    return clavesGoogle;
+}
+async function verificarGoogle(token, env) {
+    const partes = String(token || '').split('.');
+    if (partes.length !== 3) throw new Error('token');
+    const [h, p, s] = partes;
+    const cab = JSON.parse(dec.decode(desdeB64url(h)));
+    if (cab.alg !== 'RS256') throw new Error('alg');
+    let jwk = (await clavesDeGoogle(false)).find((k) => k.kid === cab.kid);
+    if (!jwk) jwk = (await clavesDeGoogle(true)).find((k) => k.kid === cab.kid);
+    if (!jwk) throw new Error('kid');
+    const clave = await crypto.subtle.importKey('jwk', { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: 'RS256', ext: true }, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+    const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', clave, desdeB64url(s), enc.encode(`${h}.${p}`));
+    if (!ok) throw new Error('firma');
+    const c = JSON.parse(dec.decode(desdeB64url(p)));
+    if (c.iss !== 'accounts.google.com' && c.iss !== 'https://accounts.google.com') throw new Error('iss');
+    if (c.aud !== env.GOOGLE_CLIENT_ID) throw new Error('aud');
+    if (!c.exp || c.exp * 1000 < Date.now() - 60e3) throw new Error('exp');
+    if (c.email_verified !== true && c.email_verified !== 'true') throw new Error('email');
+    return String(c.email).toLowerCase();
+}
+const admins = (env) => String(env.ADMIN_EMAIL || '').toLowerCase().split(/[,\s]+/).filter(Boolean);
+const claveSesion = (env) => crypto.subtle.importKey('raw', enc.encode(env.SESION_SECRETO), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+async function crearSesion(email, env) {
+    const datos = b64url(enc.encode(JSON.stringify({ e: email, x: Date.now() + 12 * 3600e3 })));
+    const firma = new Uint8Array(await crypto.subtle.sign('HMAC', await claveSesion(env), enc.encode(datos)));
+    return `${datos}.${b64url(firma)}`;
+}
+async function leerSesion(request, env) {
+    if (!env.SESION_SECRETO) return null;
+    const m = /(?:^|;\s*)sm_panel=([^;]+)/.exec(request.headers.get('Cookie') || '');
+    if (!m) return null;
+    const [datos, firma] = m[1].split('.');
+    if (!datos || !firma) return null;
+    try {
+        if (!(await crypto.subtle.verify('HMAC', await claveSesion(env), desdeB64url(firma), enc.encode(datos)))) return null;
+        const s = JSON.parse(dec.decode(desdeB64url(datos)));
+        if (!s.x || s.x < Date.now() || !admins(env).includes(s.e)) return null;
+        return s.e;
+    } catch { return null; }
+}
+const COOKIE = 'Path=/; HttpOnly; Secure; SameSite=Strict';
+const SEG_PANEL = {
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Robots-Tag': 'noindex, nofollow',
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; frame-src https://accounts.google.com/gsi/; connect-src 'self' https://accounts.google.com/gsi/; img-src 'self' data: https://*.googleusercontent.com; base-uri 'none'; frame-ancestors 'none'",
+};
+const htmlR = (body, status = 200) => new Response(body, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', ...SEG_PANEL } });
+
+const esFecha = (x) => /^\d{4}-\d{2}-\d{2}$/.test(x || '') && !Number.isNaN(Date.parse(`${x}T00:00:00Z`));
+async function estadisticas(env, desde, hasta) {
+    await tablas(env.DATOS);
+    const filas = (await env.DATOS.prepare('SELECT dia, tipo, detalle, n FROM conteo WHERE dia >= ? AND dia <= ? ORDER BY dia').bind(desde, hasta).all()).results || [];
+    const serie = {}, detalle = {};
+    for (const f of filas) {
+        (serie[f.tipo] ||= {})[f.dia] = (serie[f.tipo][f.dia] || 0) + f.n;
+        if (f.detalle) (detalle[f.tipo] ||= {})[f.detalle] = (detalle[f.tipo][f.detalle] || 0) + f.n;
+    }
+    const dias = [];
+    for (let t = Date.parse(`${desde}T12:00:00Z`), fin = Date.parse(`${hasta}T12:00:00Z`); t <= fin && dias.length < 3700; t += 86400e3) dias.push(new Date(t).toISOString().slice(0, 10));
+    const donaciones = (await env.DATOS.prepare('SELECT id, fecha, monto, moneda, nombre, nota FROM donacion ORDER BY fecha DESC, id DESC LIMIT 300').all()).results || [];
+    const totales = (await env.DATOS.prepare('SELECT moneda, COUNT(*) AS n, SUM(monto) AS total FROM donacion GROUP BY moneda').all()).results || [];
+    const primerDia = await env.DATOS.prepare('SELECT MIN(dia) AS d FROM conteo').first('d');
+    return { hoy: hoy(), desde, hasta, dias, serie, detalle, donaciones, totales, primerDia };
+}
+
+async function rutaPanel(request, env, url) {
+    const ruta = url.pathname.replace(/\/+$/, '') || '/panel';
+    const listo = env.GOOGLE_CLIENT_ID && env.ADMIN_EMAIL && env.SESION_SECRETO;
+    if (ruta === '/panel' && request.method === 'GET') {
+        if (!listo) return htmlR(paginaEntrar({ falta: true }));
+        const quien = await leerSesion(request, env);
+        return quien ? htmlR(paginaPanel({ email: quien, sinDatos: !env.DATOS })) : htmlR(paginaEntrar({ clientId: env.GOOGLE_CLIENT_ID }));
+    }
+    if (!listo) return jsonR({ error: 'setup' }, 503);
+    if (request.method !== 'GET' && !origenValido(request)) return jsonR({ error: 'origin' }, 403);
+    if (ruta === '/panel/login' && request.method === 'POST') {
+        let email;
+        try {
+            const { credential } = await request.json();
+            email = await verificarGoogle(credential, env);
+        } catch (e) {
+            console.log('login falló:', e.message);
+            return jsonR({ error: 'token' }, 401);
+        }
+        if (!admins(env).includes(email)) return jsonR({ error: 'forbidden' }, 403);
+        return jsonR({ ok: true }, 200, { 'Set-Cookie': `sm_panel=${await crearSesion(email, env)}; ${COOKIE}; Max-Age=43200` });
+    }
+    if (ruta === '/panel/logout' && request.method === 'POST') {
+        return jsonR({ ok: true }, 200, { 'Set-Cookie': `sm_panel=; ${COOKIE}; Max-Age=0` });
+    }
+    const quien = await leerSesion(request, env);
+    if (!quien) return jsonR({ error: 'auth' }, 401);
+    if (!env.DATOS) return jsonR({ error: 'nodb' }, 503);
+    if (ruta === '/panel/api/stats' && request.method === 'GET') {
+        const q = url.searchParams;
+        const hasta = esFecha(q.get('hasta')) ? q.get('hasta') : hoy();
+        const dias = Math.min(3660, Math.max(1, numero(q.get('dias'), 30)));
+        let desde = esFecha(q.get('desde')) ? q.get('desde') : hoy(Date.now() - (dias - 1) * 86400e3);
+        if (desde > hasta) desde = hasta;
+        return jsonR(await estadisticas(env, desde, hasta));
+    }
+    if (ruta === '/panel/api/donacion' && request.method === 'POST') {
+        const d = await request.json().catch(() => ({}));
+        const monto = Number(d.monto);
+        const fecha = esFecha(d.fecha) ? d.fecha : hoy();
+        if (!Number.isFinite(monto) || monto <= 0 || monto > 100000) return jsonR({ error: 'monto' }, 400);
+        await tablas(env.DATOS);
+        await env.DATOS.prepare('INSERT INTO donacion (fecha, monto, moneda, nombre, nota, creado) VALUES (?, ?, ?, ?, ?, ?)')
+            .bind(fecha, Math.round(monto * 100) / 100, d.moneda === 'GTQ' ? 'GTQ' : 'USD', corta(d.nombre, 80) || null, corta(d.nota, 200) || null, new Date().toISOString()).run();
+        return jsonR({ ok: true });
+    }
+    if (ruta === '/panel/api/donacion' && request.method === 'DELETE') {
+        await env.DATOS.prepare('DELETE FROM donacion WHERE id = ?').bind(numero(url.searchParams.get('id'), 0)).run();
+        return jsonR({ ok: true });
+    }
+    return jsonR({ error: 'not_found' }, 404);
+}
+
 export default {
     async fetch(request, env, ctx) {
         const url = new URL(request.url);
@@ -244,6 +488,10 @@ export default {
                 console.log('estado:', e.message);
                 return json({ error: 'estado' }, { 'Cache-Control': 'no-store' });
             }
+        }
+        if (url.pathname === '/api/evento') return evento(request, env).catch((e) => { console.log('evento:', e.message); return new Response(null, { status: 204 }); });
+        if (url.pathname === '/panel' || url.pathname.startsWith('/panel/')) {
+            return rutaPanel(request, env, url).catch((e) => { console.log('panel:', e.message); return jsonR({ error: 'panel' }, 500); });
         }
 
         const res = await env.ASSETS.fetch(request);

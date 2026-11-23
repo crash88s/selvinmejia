@@ -25,7 +25,7 @@
             root.dataset.theme = theme === 'light' ? 'light' : 'dark';
         })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=d3409aa017">
+    <link rel="stylesheet" href="styles.css?v=c46035892e">
 </head>
 <body>
     <a class="skip" href="#servicios">Saltar al contenido</a>
@@ -41,9 +41,10 @@
                 <a href="#bitacora" data-i18n="nav.bitacora">Bitácora</a>
                 <a href="#banco" data-i18n="nav.banco">Banco de trabajo</a>
                 <a href="#perfil" data-i18n="nav.perfil">Perfil</a>
+                <a href="#contacto" data-i18n="nav.contacto">Contacto</a>
             </nav>
             <div class="prefs">
-                <button type="button" class="apoyar-boton" data-apoyo aria-haspopup="dialog" data-i18n-attr="aria-label:apoyo.btn,title:apoyo.btn" aria-label="Apoya los proyectos" title="Apoya los proyectos">
+                <button type="button" class="apoyar-boton" data-apoyo="cabecera" aria-haspopup="dialog" data-i18n-attr="aria-label:apoyo.btn,title:apoyo.btn" aria-label="Apoya los proyectos" title="Apoya los proyectos">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
                 </button>
                 <button class="btn-ico term-open" type="button" data-term-open data-i18n-attr="aria-label:nav.terminal" aria-label="Terminal">
@@ -306,18 +307,37 @@
                 </div>
             </div>
         </section>
+        <!-- ======================================================== CONTACTO -->
+        <section class="sec" id="contacto">
+            <div class="wrap">
+                <div class="contacto">
+                    <div class="contacto-txt">
+                        <p class="eyebrow mono"><span data-i18n="contacto.eyebrow">05 · Contacto</span></p>
+                        <h2 data-i18n="contacto.titulo">¿Una consulta, una idea o un proyecto?</h2>
+                        <p data-i18n="contacto.lead">Escríbeme sobre redes, seguridad, alguno de mis proyectos o lo que se te ocurra. Leo todos los correos.</p>
+                    </div>
+                    <div class="contacto-acciones">
+                        <a class="correo" data-correo href="#contacto">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>
+                            <span data-correo-txt>info [at] selvinmejia.com</span>
+                        </a>
+                        <button type="button" class="copiar" id="copiar-correo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg><span data-i18n="contacto.copiar">Copiar</span></button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="pie">
         <div class="wrap pie-in">
             <p class="pie-apoyo">
-                <button type="button" class="pie-apoyar" data-apoyo aria-haspopup="dialog">
+                <button type="button" class="pie-apoyar" data-apoyo="pie" aria-haspopup="dialog">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
                     <span data-i18n="apoyo.btn">Apoya los proyectos</span>
                 </button>
                 <span data-i18n="apoyo.pie">Gratis y sin anuncios, gracias a quienes los apoyan.</span>
             </p>
-            <p>© <span id="anio">2026</span> Selvin Mejía · <span data-i18n="pie.hecho">Hecho en Guatemala</span></p>
+            <p>© <span id="anio">2026</span> Selvin Mejía · <span data-i18n="pie.hecho">Hecho en Guatemala</span> · <a data-correo href="#contacto">info [at] selvinmejia.com</a></p>
             <p class="mono dim pie-hint" id="pie-hint"></p>
             <button type="button" class="huevo-pie mono" id="huevo-pie" title="Huevos de pascua"><span aria-hidden="true">🥚</span> <span id="huevo-cuenta">0 / 15</span></button>
         </div>
@@ -357,8 +377,8 @@
         </div>
     </div>
 
-    <script src="i18n.js?v=d3409aa017"></script>
-    <script src="contenido.js?v=d3409aa017"></script>
-    <script src="app.js?v=d3409aa017"></script>
+    <script src="i18n.js?v=c46035892e"></script>
+    <script src="contenido.js?v=c46035892e"></script>
+    <script src="app.js?v=c46035892e"></script>
 </body>
 </html>

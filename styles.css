@@ -444,6 +444,21 @@ body.flash { animation: flash88 0.7s ease-out; }
 html.ranger body { animation: ranger 3.2s steps(5) 1; }
 @keyframes ranger { 0% { filter: hue-rotate(0deg); } 20% { filter: hue-rotate(140deg); } 40% { filter: hue-rotate(220deg); } 60% { filter: hue-rotate(300deg); } 80% { filter: hue-rotate(60deg); } 100% { filter: none; } }
 
+/* contacto */
+.contacto { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: center; padding: 34px 36px; border-radius: 20px; border: 1px solid var(--border);
+    background: radial-gradient(120% 140% at 100% 0%, var(--naranja-soft), transparent 55%), radial-gradient(120% 140% at 0% 100%, var(--cyan-soft), transparent 55%), var(--surface); }
+.contacto .eyebrow { margin: 0 0 10px; color: var(--naranja); }
+.contacto h2 { font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.02em; margin: 0; }
+.contacto-txt p:last-child { margin: 10px 0 0; color: var(--text-2); font-size: 16px; max-width: 34em; }
+.contacto-acciones { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.correo { display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 20px; border-radius: 14px; background: var(--naranja); color: #fff; font: 600 16px var(--mono);
+    box-shadow: 0 10px 26px -12px var(--naranja); transition: transform .15s, filter .15s; }
+.correo:hover { text-decoration: none; transform: translateY(-2px); filter: brightness(1.06); }
+.correo svg, .copiar svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.copiar { display: inline-flex; align-items: center; gap: 8px; height: 50px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: 600 14px var(--sans); cursor: pointer; }
+.copiar:hover { border-color: var(--naranja); color: var(--naranja); }
+.copiar.ok { border-color: var(--green); color: var(--green); }
+
 /* efectos visuales */
 .fx { position: fixed; inset: 0; z-index: 76; pointer-events: none; overflow: hidden; }
 .fx-lluvia i { position: absolute; top: -60px; font-style: normal; animation: cae linear forwards; }
@@ -486,6 +501,8 @@ html.ranger body { animation: ranger 3.2s steps(5) 1; }
     .svc.destacado { grid-template-columns: 1fr; }
     .svc.destacado .svc-vivo { grid-row: auto; grid-column: auto; }
     .perfil { grid-template-columns: 1fr; }
+    .contacto { grid-template-columns: 1fr; padding: 26px 22px; }
+    .contacto-acciones { justify-content: flex-start; }
     .stack-grid { grid-template-columns: repeat(3, 1fr); }
     .dest-grid { grid-template-columns: 1fr 1fr; }
 }

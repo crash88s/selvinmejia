@@ -17,6 +17,23 @@ Cada proyecto se revisa en vivo y hay una terminal escondida (tecla <kbd>`</kbd>
 - **Apoya los proyectos**: botón en el pie que abre la ventana con $3, $5, $10 u otro monto (PayPal), igual que en aves. También con el comando `apoyar`.
 - Español e inglés (`?lang=en`), modo oscuro y claro, adaptado a teléfono.
 
+## Contacto
+
+El correo **info@selvinmejia.com** aparece en la sección 05 · Contacto, en el pie de página y con el comando `contacto` de la terminal.
+Se arma en el navegador para que los robots que leen el HTML no lo encuentren tan fácil.
+
+## Panel privado (/panel)
+
+https://selvinmejia.com/panel, con "Iniciar sesión con Google" (solo el correo que configures). Muestra:
+
+- Visitas, clics a proyectos, terminal, huevos de pascua, contacto, apoyo y donaciones (con periodo de 7, 30, 90, 365 días o personalizado).
+- **De dónde te visitan:** mapa por país y top 10, cómo llegan (usa `?ref=linkedin` en tus enlaces), nuevos y recurrentes, idioma, dispositivo, sistema operativo, navegador y a qué hora (hora de Guatemala).
+- **Qué hacen en el sitio:** proyectos que abren, comandos de la terminal, huevos encontrados, uso del correo, cómo abren la terminal y tema.
+- **Apoyo:** desde dónde abren la ventana, monto elegido y registro de donaciones (PayPal.me no avisa a la página).
+
+Los conteos son anónimos (sin IPs) y se guardan en la base D1 `selvinmejia-datos`, que `publicar.sh` crea la primera vez.
+Configúralo una sola vez con `bash configurar-panel.sh` (puedes reutilizar el ID de cliente de Google de PacketLens agregando el origen https://selvinmejia.com).
+
 ## Mantenerlo (un par de días al mes)
 
 Casi todo se edita en **`contenido.js`**:
@@ -37,7 +54,11 @@ i18n.js         Textos en español e inglés
 contenido.js    Proyectos, banco de trabajo y bitácora  ← lo que más vas a editar
 favicon.svg     Ícono (lentes de sol + LED)
 apple-touch-icon.png  Ícono para iPhone
-src/index.js    Worker: /api/estado, redirección de www y cabeceras de seguridad
+src/index.js    Worker: /api/estado, /api/evento, /panel, redirección de www y cabeceras de seguridad
+src/panel.js    Páginas del panel privado (no son archivos públicos)
+src/mapa.js     Contornos de países para el mapa del panel
+vendor/         Chart.js (gráficas del panel)
+configurar-panel.sh  Configura el acceso con Google al panel (una vez)
 wrangler.jsonc  Configuración del Worker (dominios y base D1)
 publicar.sh     Probar localmente y publicar en Cloudflare + GitHub
 ```

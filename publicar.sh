@@ -37,6 +37,18 @@ fi
 ok "sesión de Cloudflare activa"
 ok "versión de archivos: $VERSION"
 
+# Base de datos propia (conteos del panel): se crea una sola vez y su ID queda en wrangler.jsonc
+if grep -q '"database_id": "PENDIENTE"' wrangler.jsonc; then
+  ID="$("${WRANGLER[@]}" d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const x=JSON.parse(s).find(d=>d.name==="selvinmejia-datos");process.stdout.write(x?x.uuid:"")}catch{}})')"
+  if [[ -z "$ID" ]]; then
+    "${WRANGLER[@]}" d1 create selvinmejia-datos >/dev/null
+    ID="$("${WRANGLER[@]}" d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const x=JSON.parse(s).find(d=>d.name==="selvinmejia-datos");process.stdout.write(x?x.uuid:"")}catch{}})')"
+  fi
+  [[ -n "$ID" ]] || die "No pude crear la base de datos selvinmejia-datos en Cloudflare."
+  perl -pi -e 's{"database_id": "PENDIENTE"}{"database_id": "'"$ID"'"}' wrangler.jsonc
+  ok "base de datos selvinmejia-datos lista ($ID)"
+fi
+
 if ! "${WRANGLER[@]}" deploy; then
   die "Cloudflare no dejó tomar selvinmejia.com. Hoy la raíz la usa otro proyecto. En el panel de Cloudflare:
   1) Workers & Pages → analizador-forense-red (el proyecto de Pages que tenga selvinmejia.com) → Custom domains → quita selvinmejia.com y www.
@@ -97,3 +109,4 @@ git push -q -u origin HEAD:main
 ok "código en $(git remote get-url origin | sed 's/\.git$//')"
 
 printf '\n\033[1;32mListo.\033[0m  %s\n' "$SITIO"
+echo "Panel privado: $SITIO/panel  (la primera vez configúralo con: bash configurar-panel.sh)"

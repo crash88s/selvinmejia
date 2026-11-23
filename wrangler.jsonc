@@ -16,9 +16,20 @@
 		{ "pattern": "www.selvinmejia.com", "custom_domain": true }
 	],
 	"observability": { "enabled": true },
-	// Conteos anónimos de PacketLens (la misma base D1, que conserva el nombre tshoot-datos). Aquí solo se LEEN.
-	// "remote": true hace que la vista local también lea los datos reales de Cloudflare.
+		// Límite de eventos por persona (para que nadie llene los conteos con un script)
+	"ratelimits": [
+		{ "name": "LIMITE_EVENTOS", "namespace_id": "4291", "simple": { "limit": 60, "period": 60 } }
+	],
 	"d1_databases": [
+		// Base propia del sitio: conteos anónimos y donaciones del panel (/panel).
+		// publicar.sh la crea la primera vez y escribe aquí su database_id.
+		{
+			"binding": "DATOS",
+			"database_name": "selvinmejia-datos",
+			"database_id": "3b649232-9954-48ad-9ba8-72b514f6d613"
+		},
+		// Conteos de PacketLens (su base D1, que conserva el nombre tshoot-datos). Aquí solo se LEEN.
+		// "remote": true hace que la vista local también lea los datos reales de Cloudflare.
 		{
 			"binding": "DB",
 			"database_name": "tshoot-datos",
