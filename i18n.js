@@ -102,6 +102,7 @@ window.I18N = {
         'banco.estudiando': 'estudiando',
 
         'pie.hecho': 'Hecho en Guatemala',
+        'pie.derechos': 'Todos los derechos reservados.',
         'pie.apoyar': 'Apoyar los proyectos',
         'pie.secreto': 'Presiona {k} para abrir la terminal',
 
@@ -212,6 +213,7 @@ window.I18N = {
         'banco.estudiando': 'studying',
 
         'pie.hecho': 'Made in Guatemala',
+        'pie.derechos': 'All rights reserved.',
         'pie.apoyar': 'Support the projects',
         'pie.secreto': 'Press {k} to open the terminal',
 
