@@ -125,6 +125,37 @@ async function aves(resInicio) {
     return datos.es || datos.en ? datos : null;
 }
 
+// ------------------------------------------------ sonda de aves (estado público)
+// Solo se exponen 4 datos: estado, minutos desde el último audio, batería y si está grabando.
+function horaGTmin() {
+    const d = new Date(Date.now() - 6 * 3600e3);
+    return d.getUTCHours() * 60 + d.getUTCMinutes();
+}
+async function sonda() {
+    const r = await fetch('https://aves.selvinmejia.com/api/estado', { signal: AbortSignal.timeout(5000), cf: { cacheTtl: 0 } });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const t = d.telefono || {};
+    const rep = t.ts ? t.minutos : null;              // minutos desde el último reporte del teléfono
+    const aud = d.ultima_subida ? d.minutos : null;   // minutos desde el último audio
+    let enHorario = true;
+    const h = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(t.horario || '');
+    if (h) {
+        const ahora = horaGTmin(), ini = +h[1] * 60 + +h[2], fin = +h[3] * 60 + +h[4];
+        enHorario = ahora >= ini && ahora < fin;
+    }
+    let estado = 'escuchando';
+    if (rep == null) estado = 'sin_datos';
+    else if (rep > 25) estado = 'sin_senal';
+    else if (!enHorario) estado = 'pausa';
+    else if (aud == null || aud > 25) estado = 'sin_audio';
+    return {
+        estado,
+        audioMin: Number.isFinite(aud) ? aud : null,
+        bateria: Number.isFinite(t.bateria) ? t.bateria : null,
+    };
+}
+
 // ------------------------------------------------ PacketLens (D1, solo lectura)
 function diaGT(offsetDias = 0) {
     const d = new Date(Date.now() - 6 * 3600e3 - offsetDias * 86400e3);
@@ -168,10 +199,11 @@ async function estado(env) {
     // Cancela los cuerpos que no vamos a leer
     for (const r of revisiones) if (r.res && r.id !== 'aves') r.res.body && r.res.body.cancel();
 
-    const [datosAves, datosPacketlens, datosClima] = await Promise.all([
+    const [datosAves, datosPacketlens, datosClima, datosSonda] = await Promise.all([
         conLimite(aves(avesRes && avesRes.ok ? avesRes.res : null), 8000),
         conLimite(packetlens(env), 4000),
         conLimite(clima(), 5000),
+        conLimite(sonda(), 6000),
     ]);
 
     return {
@@ -180,12 +212,13 @@ async function estado(env) {
         aves: datosAves,
         packetlens: datosPacketlens,
         clima: datosClima,
+        sonda: datosSonda,
     };
 }
 
 async function apiEstado(request, env, ctx) {
     const cache = caches.default;
-    const clave = new Request(`https://${CANONICO}/__estado/v2`);
+    const clave = new Request(`https://${CANONICO}/__estado/v3`);
     const guardado = await cache.match(clave);
     if (guardado) return guardado;
 

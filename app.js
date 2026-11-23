@@ -143,11 +143,22 @@
         const a = estado.aves;
         const d = a && (a[lang] || a.es || a.en);
         if (!d || !d.hallazgo) return `<p class="nota">${esc(d && d.texto ? d.texto : t('aves.sinDatos'))}</p>`;
-        return `<div class="ave">
+        return `<div class="aves-vivo"><div class="ave">
                 ${a.foto ? `<img src="${esc(a.foto)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
                 <div><span class="k">${esc(t('aves.hallazgo'))}</span><b>${esc(d.hallazgo)}</b>
                 <span class="sub">${d.rareza ? `<em>${esc(d.rareza)}</em> · ` : ''}${num(d.especies)} ${esc(t('aves.especies'))} · ${num(d.detecciones)} ${esc(t('aves.detecciones'))}</span></div>
-            </div>`;
+            </div>${lineaSonda()}</div>`;
+    }
+    function lineaSonda() {
+        const s = estado && estado.sonda;
+        if (!s) return '';
+        const ok = s.estado === 'escuchando';
+        const det = [];
+        if (s.audioMin != null) det.push(t('sonda.audio', { m: s.audioMin }));
+        if (s.bateria != null) det.push(t('sonda.bateria', { b: s.bateria }));
+        return `<div class="sonda ${ok ? 'ok' : s.estado === 'pausa' ? 'pausa' : 'bad'}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
+            <span>${esc(t('sonda.titulo'))}: <b>${esc(t('sonda.' + s.estado))}</b>${det.length ? ` <i>· ${esc(det.join(' · '))}</i>` : ''}</span></div>`;
     }
     function vivoPacketlens() {
         if (!estado) return '<span class="skel" style="width:60%"></span>';
@@ -314,6 +325,88 @@
     apoyo.addEventListener('click', (e) => { if (e.target === apoyo) cerrarApoyo(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !apoyo.hidden) { e.stopImmediatePropagation(); cerrarApoyo(); } }, true);
 
+    /* ================================================ HUEVOS DE PASCUA */
+    const ALIAS_EXTRA = {};
+    const HUEVOS = {
+        matrix: { nombre: 'The Matrix', pista: { es: 'Hay que elegir una pastilla…', en: 'You have to pick a pill…' } },
+        bttf: { nombre: 'Volver al futuro', pista: { es: 'A 88 millas por hora verás algo serio.', en: 'At 88 miles per hour you will see some serious stuff.' } },
+        rpo: { nombre: 'Ready Player One', pista: { es: 'Un código clásico de consola, en la página.', en: 'A classic console code, on the page.' } },
+        spiderman: { nombre: 'Spider-Man', pista: { es: 'Pide poderes de administrador.', en: 'Ask for admin powers.' } },
+        ironman: { nombre: 'Iron Man', pista: { es: 'Llama al asistente de Tony.', en: "Call Tony's assistant." } },
+        avengers: { nombre: 'Avengers', pista: { es: 'Reúne a todo el equipo.', en: 'Assemble the whole team.' } },
+        saw: { nombre: 'SAW', pista: { es: 'Alguien quiere jugar un juego.', en: 'Someone wants to play a game.' } },
+        rapido: { nombre: 'Rápido y furioso', pista: { es: 'Un botón de óxido nitroso.', en: 'A nitrous oxide button.' } },
+        tortugas: { nombre: 'Tortugas Ninja', pista: { es: 'Una palabra de surfistas y pizza.', en: 'A surfer word and pizza.' } },
+        gadget: { nombre: 'Inspector Gadget', pista: { es: 'Go-go… ¿qué?', en: 'Go-go… what?' } },
+        rangers: { nombre: 'Power Rangers', pista: { es: 'Es hora de transformarse.', en: "It's that time." } },
+        pokemon: { nombre: 'Pokémon', pista: { es: 'Consulta la enciclopedia de bolsillo.', en: 'Check the pocket encyclopedia.' } },
+        naruto: { nombre: 'Naruto', pista: { es: '¡De veras!', en: 'Believe it!' } },
+        dbz: { nombre: 'Dragon Ball Z', pista: { es: 'Carga la técnica de la tortuga.', en: "Charge the turtle's technique." } },
+        deathnote: { nombre: 'Death Note', pista: { es: 'Borra todo a la fuerza.', en: 'Force-delete everything.' } },
+    };
+    const encontrados = new Set();
+    try { JSON.parse(localStorage.getItem('sm.huevos') || '[]').forEach((x) => HUEVOS[x] && encontrados.add(x)); } catch (e) {}
+    let toastT = null;
+    function huevo(id) {
+        if (!HUEVOS[id] || encontrados.has(id)) return;
+        encontrados.add(id);
+        try { localStorage.setItem('sm.huevos', JSON.stringify([...encontrados])); } catch (e) {}
+        let el = $('#toast');
+        if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+        el.innerHTML = `<span>🥚</span><div><b>${esc(ES() ? 'Huevo encontrado' : 'Egg found')}: ${esc(HUEVOS[id].nombre)}</b><small>${encontrados.size} / ${Object.keys(HUEVOS).length}</small></div>`;
+        el.className = 'ver';
+        clearTimeout(toastT);
+        toastT = setTimeout(() => { el.className = ''; }, 3800);
+    }
+
+    // Lluvia de Matrix en toda la página (unos segundos)
+    function lluviaMatrix(ms = 6000) {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches || $('#lluvia')) return;
+        const cv = document.createElement('canvas');
+        cv.id = 'lluvia';
+        document.body.appendChild(cv);
+        const cx = cv.getContext('2d');
+        const W = (cv.width = innerWidth), H = (cv.height = innerHeight);
+        const f = 16, cols = Math.ceil(W / f), y = Array.from({ length: cols }, () => Math.random() * -50);
+        const ch = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789';
+        const fin = performance.now() + ms;
+        (function cuadro(ahora) {
+            cx.fillStyle = 'rgba(0, 8, 3, 0.12)';
+            cx.fillRect(0, 0, W, H);
+            cx.font = `${f}px ui-monospace, Menlo, monospace`;
+            for (let i = 0; i < cols; i++) {
+                cx.fillStyle = Math.random() > 0.96 ? '#d9ffe4' : '#22c55e';
+                cx.fillText(ch[Math.floor(Math.random() * ch.length)], i * f, y[i] * f);
+                if (y[i] * f > H && Math.random() > 0.975) y[i] = 0;
+                y[i]++;
+            }
+            if (ahora < fin) requestAnimationFrame(cuadro);
+            else { cv.classList.add('fuera'); setTimeout(() => cv.remove(), 800); }
+        })(performance.now());
+    }
+
+    // Ready Player One: código Konami en la página
+    const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let kIdx = 0;
+    document.addEventListener('keydown', (e) => {
+        const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+        kIdx = k === KONAMI[kIdx] ? kIdx + 1 : k === KONAMI[0] ? 1 : 0;
+        if (kIdx === KONAMI.length) {
+            kIdx = 0;
+            huevo('rpo');
+            lluviaMatrix(2500);
+        }
+    });
+
+    // Matrix: cinco clics al avatar
+    let clicsAvatar = 0, clicsT = null;
+    $('.avatar') && $('.avatar').addEventListener('click', () => {
+        clicsAvatar++;
+        clearTimeout(clicsT);
+        clicsT = setTimeout(() => { clicsAvatar = 0; }, 1500);
+        if (clicsAvatar >= 5) { clicsAvatar = 0; lluviaMatrix(); huevo('matrix'); }
+    });
+
     /* =========================================================== TERMINAL */
     const term = $('#term');
     const out = $('#term-out');
@@ -375,6 +468,7 @@
                 ['theme dark|light', 'switch theme'], ['support', 'buy me a coffee'], ['history', 'commands you typed'], ['clear', 'clear the screen'], ['exit', 'close the terminal'],
             ];
             linea(filas.map(([c, d]) => `  <span class="c">${esc(c.padEnd(20))}</span><span class="d">${esc(d)}</span>`).join('\n'));
+            linea(`\n<span class="w">🥚 ${ES() ? 'Hay huevos de pascua escondidos en este sitio. Escribe' : 'There are easter eggs hidden on this site. Type'}</span> <span class="c">${ES() ? 'huevos' : 'eggs'}</span>`);
         },
         whoami() {
             const pf = C.perfil;
@@ -491,11 +585,104 @@
         history() { linea(historial.map((h, i) => `${String(i + 1).padStart(4)}  ${esc(h)}`).join('\n') || '<span class="d">(vacío)</span>'); },
         clear() { out.innerHTML = ''; },
         exit() { cerrarTerm(); },
-        sudo() { linea(`<span class="e">${ES() ? 'selvin no está en el archivo sudoers. Este incidente será reportado.' : 'selvin is not in the sudoers file. This incident will be reported.'}</span>`); },
+        sudo() {
+            linea(`<span class="v">🕷 ${ES() ? 'Un gran poder conlleva una gran responsabilidad.' : 'With great power comes great responsibility.'}</span>\n<span class="e">${ES() ? 'selvin no está en el archivo sudoers. Este incidente será reportado.' : 'selvin is not in the sudoers file. This incident will be reported.'}</span>`);
+            huevo('spiderman');
+        },
         echo(args) { linea(esc(args.join(' '))); },
         apoyar() { linea(`<span class="v">♥</span> ${esc(t('apoyo.titulo'))}`); abrirApoyo(); },
-        rm(args) { linea(args.join(' ').includes('-rf') ? `<span class="w">${ES() ? 'Buen intento 😄' : 'Nice try 😄'}</span>` : `<span class="e">rm: ${ES() ? 'permiso denegado' : 'permission denied'}</span>`); },
+        rm(args) {
+            if (!args.join(' ').includes('-rf')) return linea(`<span class="e">rm: ${ES() ? 'permiso denegado' : 'permission denied'}</span>`);
+            linea(`<span class="v">📓 ${ES() ? 'Escribiste un nombre en la Death Note… pero era un directorio. Ryuk se ríe. Permiso denegado.' : 'You wrote a name in the Death Note… but it was a directory. Ryuk laughs. Permission denied.'}</span>`);
+            huevo('deathnote');
+        },
     };
+    /* ------------------------------------------------- huevos de pascua */
+    const anioAzar = () => [1885, 1955, 1985, 2015][Math.floor(Math.random() * 4)];
+    Object.assign(COMANDOS, {
+        huevos() {
+            const n = encontrados.size;
+            linea(`<b>🥚 ${ES() ? 'Huevos de pascua' : 'Easter eggs'}: ${n} / ${Object.keys(HUEVOS).length}</b>`);
+            linea(Object.entries(HUEVOS).map(([id, h]) => encontrados.has(id)
+                ? `  <span class="ok">✓</span> ${esc(h.nombre)}`
+                : `  <span class="d">· ${esc(L(h.pista))}</span>`).join('\n'));
+            if (n === Object.keys(HUEVOS).length) linea(`<span class="ok">${ES() ? '¡Los encontraste todos! Eres un verdadero Gunter.' : 'You found them all! A true Gunter.'}</span>`);
+        },
+        matrix() {
+            linea(`<span class="ok">${ES() ? 'Despierta, Neo…' : 'Wake up, Neo…'}</span>\n<span class="d">${ES() ? 'Sigue al pollito blanco. 🐤' : 'Follow the white chick. 🐤'}</span>`);
+            lluviaMatrix();
+            huevo('matrix');
+        },
+        pastilla(args) {
+            const c = (args[0] || '').toLowerCase();
+            if (c === 'azul' || c === 'blue') return linea(`<span class="c">${ES() ? 'Fin de la historia. Despiertas en tu cama y crees lo que quieras creer.' : 'The story ends. You wake up in your bed and believe whatever you want.'}</span>`);
+            if (c === 'roja' || c === 'red') return COMANDOS.matrix();
+            linea(`<span class="w">${ES() ? '¿Roja o azul?' : 'Red or blue?'}</span>`);
+        },
+        flux() {
+            linea(`⚡ ${ES() ? 'Condensador de flujo: 1.21 gigawatts' : 'Flux capacitor: 1.21 gigawatts'}\n🚗 88 mph… <b>${ES() ? 'destino' : 'destination'}: ${anioAzar()}</b>`);
+            document.body.classList.add('flash');
+            setTimeout(() => document.body.classList.remove('flash'), 700);
+            huevo('bttf');
+        },
+        jarvis() {
+            linea(`<span class="c">J.A.R.V.I.S.: ${ES() ? 'todos los sistemas en línea, señor. El traje está listo.' : 'all systems online, sir. The suit is ready.'}</span>`);
+            huevo('ironman');
+        },
+        async avengers() {
+            linea(`<b>${ES() ? 'Avengers… ¡reúnanse!' : 'Avengers… assemble!'}</b>`);
+            await COMANDOS.status();
+            huevo('avengers');
+        },
+        jigsaw() {
+            linea(`<span class="e">🎭 ${ES() ? 'Hola, visitante. ¿Quieres jugar un juego? Encuentra todos los huevos antes de que se acabe el tiempo.' : 'Hello, visitor. Do you want to play a game? Find every egg before time runs out.'}</span>`);
+            huevo('saw');
+        },
+        nos() {
+            linea(`<span class="c">🏎 NOS ${ES() ? 'activado' : 'engaged'}: ping → 0.25 ms</span> <span class="d">(${ES() ? 'en la vida real no' : 'not in real life'})</span>\n${ES() ? 'Lo más importante siempre será la familia.' : 'The most important thing will always be family.'}`);
+            huevo('rapido');
+        },
+        cowabunga() {
+            linea(`🍕 <b>${ES() ? '¡Cowabunga!' : 'Cowabunga!'}</b> ${ES() ? 'Cuatro pizzas entregadas en la alcantarilla.' : 'Four pizzas delivered to the sewer.'}`);
+            huevo('tortugas');
+        },
+        gadget() {
+            linea(`🕵️ <b>${ES() ? '¡Go-go-gadget terminal!' : 'Go-go-gadget terminal!'}</b>\n<span class="d">${ES() ? '…salió el helicóptero del sombrero. Otra vez.' : '…the hat helicopter came out. Again.'}</span>`);
+            huevo('gadget');
+        },
+        morph() {
+            linea(`<b>${ES() ? '¡Es hora de transformarse!' : "It's morphin' time!"}</b> 🔴🔵🟡🩷⚫`);
+            root.classList.add('ranger');
+            setTimeout(() => root.classList.remove('ranger'), 3200);
+            huevo('rangers');
+        },
+        pokedex(args) {
+            linea(`<b>Pokédex #0088 — ${ES() ? 'Pollo' : 'Pollo'}</b>\n${ES() ? 'Tipo: Normal / Red. Habilidad: troubleshooting. Evoluciona con café.' : 'Type: Normal / Network. Ability: troubleshooting. Evolves with coffee.'}\n<span class="d">${ES() ? 'Suele verse en el hombro de su entrenador.' : 'Often seen on its trainer’s shoulder.'}</span>`);
+            huevo('pokemon');
+        },
+        dattebayo() {
+            linea(`🍥 <b>${ES() ? '¡De veras!' : 'Believe it!'}</b> ${ES() ? 'Nunca retrocedo en un ticket: ese es mi camino ninja.' : 'I never back down from a ticket: that is my ninja way.'}`);
+            huevo('naruto');
+        },
+        kamehameha() {
+            linea(`<span class="c">${ES() ? 'Ka… me… ha… me…' : 'Ka… me… ha… me…'}</span>`);
+            setTimeout(() => {
+                linea(`<span class="c">HAAAAA ════════════════════════▶ 💥</span>\n<span class="w">${ES() ? '¡Su nivel de pelea es de más de 8000!' : "It's over 9000!"}</span>`);
+                huevo('dbz');
+            }, 600);
+        },
+    });
+    Object.assign(ALIAS_EXTRA, {
+        neo: 'matrix', morpheus: 'matrix', morfeo: 'matrix', pill: 'pastilla',
+        '88': 'flux', delorean: 'flux', doc: 'flux', marty: 'flux',
+        ironman: 'jarvis', stark: 'jarvis', assemble: 'avengers', 'reúnanse': 'avengers', vengadores: 'avengers',
+        saw: 'jigsaw', juego: 'jigsaw', familia: 'nos', family: 'nos', toretto: 'nos',
+        pizza: 'cowabunga', tortugas: 'cowabunga', tmnt: 'cowabunga', 'go-go-gadget': 'gadget', inspector: 'gadget',
+        rangers: 'morph', 'morphin': 'morph', pikachu: 'pokedex', pokemon: 'pokedex', 'pokémon': 'pokedex', pollo: 'pokedex',
+        naruto: 'dattebayo', rasengan: 'dattebayo', goku: 'kamehameha', vegeta: 'kamehameha', dbz: 'kamehameha',
+        eggs: 'huevos', easter: 'huevos', spiderman: 'sudo', spidey: 'sudo', kira: 'rm', ryuk: 'rm',
+    });
+
     const ALIAS = { '?': 'help', ayuda: 'help', servicios: 'ls', services: 'ls', estado: 'status', birds: 'aves', weather: 'clima', fecha: 'date', abrir: 'open', tema: 'theme', idioma: 'lang', cls: 'clear', donate: 'apoyar', support: 'apoyar', donar: 'apoyar', salir: 'exit', quit: 'exit', about: 'whoami', 'cat': 'whoami', tracert: 'traceroute' };
 
     async function ejecutar(texto) {
@@ -505,7 +692,7 @@
         historial.push(limpio);
         hIdx = historial.length;
         const [cmd, ...args] = limpio.split(/\s+/);
-        const nombre = ALIAS[cmd.toLowerCase()] || cmd.toLowerCase();
+        const nombre = ALIAS[cmd.toLowerCase()] || ALIAS_EXTRA[cmd.toLowerCase()] || cmd.toLowerCase();
         const fn = COMANDOS[nombre];
         if (!fn) return linea(`<span class="e">${esc(cmd)}: ${ES() ? 'comando no encontrado. Escribe' : 'command not found. Type'} </span><span class="c">help</span>`);
         input.disabled = true;

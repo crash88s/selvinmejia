@@ -24,7 +24,7 @@ window.CONTENIDO = {
                 ['enfoque', 'Firewalls de nueva generación, SD-WAN y alta disponibilidad'],
                 ['formación', 'Lic. en Tecnología y Administración de las Telecomunicaciones'],
                 ['estudiando', 'AWS Solutions Architect – Associate (SAA-C03)'],
-                ['fuera', 'Herramientas gratis, aves y café'],
+                ['tiempo libre', 'Creo herramientas web gratuitas y registro las aves de Guatemala con una sonda de audio propia'],
             ],
             en: [
                 ['role', 'Senior Cybersecurity Engineer'],
@@ -33,7 +33,7 @@ window.CONTENIDO = {
                 ['focus', 'Next-generation firewalls, SD-WAN and high availability'],
                 ['degree', 'B.S. in Telecommunications Technology and Management'],
                 ['studying', 'AWS Solutions Architect – Associate (SAA-C03)'],
-                ['off hours', 'Free tools, birds and coffee'],
+                ['free time', 'I build free web tools and log the birds of Guatemala with my own audio probe'],
             ],
         },
         trayectoria: [
