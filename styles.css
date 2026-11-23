@@ -252,6 +252,7 @@ h1 { font-size: clamp(44px, 7vw, 76px); letter-spacing: -0.035em; font-weight: 7
 .sonda svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--a); stroke-width: 1.8; stroke-linecap: round; }
 .sonda b { color: var(--green); } .sonda.bad b { color: var(--red); } .sonda.pausa b { color: var(--amber); }
 .sonda i { font-style: normal; color: var(--muted); }
+.c-verde .sonda { font-size: 14px; }
 .tunel { display: flex; align-items: center; gap: 10px; font: 14px var(--mono); color: var(--text-2); }
 .tunel svg { width: 22px; height: 22px; fill: none; stroke: var(--a); stroke-width: 1.8; stroke-linecap: round; }
 .tunel.ok b { color: var(--green); } .tunel.bad b { color: var(--red); }

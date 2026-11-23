@@ -140,14 +140,7 @@
 
     function vivoAves() {
         if (!estado) return '<span class="skel" style="width:70%"></span>';
-        const a = estado.aves;
-        const d = a && (a[lang] || a.es || a.en);
-        if (!d || !d.hallazgo) return `<p class="nota">${esc(d && d.texto ? d.texto : t('aves.sinDatos'))}</p>`;
-        return `<div class="aves-vivo"><div class="ave">
-                ${a.foto ? `<img src="${esc(a.foto)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
-                <div><span class="k">${esc(t('aves.hallazgo'))}</span><b>${esc(d.hallazgo)}</b>
-                <span class="sub">${d.rareza ? `<em>${esc(d.rareza)}</em> · ` : ''}${num(d.especies)} ${esc(t('aves.especies'))} · ${num(d.detecciones)} ${esc(t('aves.detecciones'))}</span></div>
-            </div>${lineaSonda()}</div>`;
+        return lineaSonda() || `<p class="nota">${esc(t('aves.sinDatos'))}</p>`;
     }
     function lineaSonda() {
         const s = estado && estado.sonda;
