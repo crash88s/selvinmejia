@@ -10,7 +10,7 @@
 import { paginaEntrar, paginaPanel } from './panel.js';
 
 const CANONICO = 'selvinmejia.com';
-const CACHE_SEG = 60;
+const CACHE_SEG = 30;
 
 const SERVICIOS = [
     { id: 'aves', url: 'https://aves.selvinmejia.com/' },
@@ -136,12 +136,15 @@ function horaGTmin() {
     return d.getUTCHours() * 60 + d.getUTCMinutes();
 }
 async function sonda() {
+    // Misma lógica que la página /sonda/ de aves.selvinmejia.com, pero con los minutos calculados
+    // aquí a partir de las horas reales (no de un número que pudo quedar guardado).
     const r = await fetch('https://aves.selvinmejia.com/api/estado', { signal: AbortSignal.timeout(5000), cf: { cacheTtl: 0 } });
     if (!r.ok) return null;
     const d = await r.json();
     const t = d.telefono || {};
-    const rep = t.ts ? t.minutos : null;              // minutos desde el último reporte del teléfono
-    const aud = d.ultima_subida ? d.minutos : null;   // minutos desde el último audio
+    const hace = (iso) => { const x = Date.parse(iso || ''); return Number.isFinite(x) ? Math.max(0, Math.round((Date.now() - x) / 60000)) : null; };
+    const rep = t.ts ? hace(t.ts) : null;                  // minutos desde el último reporte del teléfono
+    const aud = d.ultima_subida ? hace(d.ultima_subida) : null; // minutos desde el último audio
     let enHorario = true;
     const h = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(t.horario || '');
     if (h) {
@@ -151,12 +154,16 @@ async function sonda() {
     let estado = 'escuchando';
     if (rep == null) estado = 'sin_datos';
     else if (rep > 25) estado = 'sin_senal';
+    else if (enHorario && (t.sin_fuente_s != null || ((t.reinicios_1h ?? 0) > 60 && (aud == null || aud > 25)))) estado = 'app_cerrada';
+    else if (enHorario && (aud == null || aud > 25)) estado = 'sin_audio';
     else if (!enHorario) estado = 'pausa';
-    else if (aud == null || aud > 25) estado = 'sin_audio';
+    const fresco = rep != null && rep <= 25;   // la batería solo vale si el reporte es reciente
     return {
         estado,
-        audioMin: Number.isFinite(aud) ? aud : null,
-        bateria: Number.isFinite(t.bateria) ? t.bateria : null,
+        reporteMin: rep,
+        audioMin: aud,
+        bateria: fresco && Number.isFinite(t.bateria) ? t.bateria : null,
+        cargando: fresco && /CHARG|FULL/i.test(String(t.estado_bateria || '')) && !/DISCHARG/i.test(String(t.estado_bateria || '')),
     };
 }
 
@@ -222,7 +229,7 @@ async function estado(env) {
 
 async function apiEstado(request, env, ctx) {
     const cache = caches.default;
-    const clave = new Request(`https://${CANONICO}/__estado/v3`);
+    const clave = new Request(`https://${CANONICO}/__estado/v4`);
     const guardado = await cache.match(clave);
     if (guardado) return guardado;
 

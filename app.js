@@ -177,13 +177,23 @@
     function lineaSonda() {
         const s = estado && estado.sonda;
         if (!s) return '';
-        const ok = s.estado === 'escuchando';
         const det = [];
-        if (s.audioMin != null) det.push(t('sonda.audio', { m: s.audioMin }));
-        if (s.bateria != null) det.push(t('sonda.bateria', { b: s.bateria }));
-        return `<div class="sonda ${ok ? 'ok' : s.estado === 'pausa' ? 'pausa' : 'bad'}">
+        if (s.estado === 'sin_senal' || s.estado === 'sin_datos') {
+            if (s.reporteMin != null) det.push(t('sonda.reporte', { m: lapso(s.reporteMin) }));
+        } else {
+            if (s.audioMin != null) det.push(t('sonda.audio', { m: lapso(s.audioMin) }));
+            if (s.bateria != null) det.push(t('sonda.bateria', { b: s.bateria }) + (s.cargando ? ` · ${t('sonda.cargando')}` : ''));
+        }
+        const cls = s.estado === 'escuchando' ? 'ok' : s.estado === 'pausa' || s.estado === 'sin_audio' ? 'pausa' : 'bad';
+        return `<div class="sonda ${cls}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
             <span><span>${esc(t('sonda.titulo'))}: <b>${esc(t('sonda.' + s.estado))}</b></span>${det.length ? `<i>${esc(det.join(' · '))}</i>` : ''}</span></div>`;
+    }
+    // 7 min · 1 h 13 min · 2 d 3 h
+    function lapso(m) {
+        if (m < 60) return `${m} min`;
+        if (m < 1440) return `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}`;
+        return `${Math.floor(m / 1440)} d${Math.floor((m % 1440) / 60) ? ` ${Math.floor((m % 1440) / 60)} h` : ''}`;
     }
     function vivoPacketlens() {
         if (!estado) return '<span class="skel" style="width:60%"></span>';
