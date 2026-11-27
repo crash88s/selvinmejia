@@ -2,7 +2,7 @@
 window.I18N = {
     es: {
         'meta.title': 'Selvin Mejía · NOC personal',
-        'meta.desc': 'Selvin Mejía, ingeniero en Redes y Ciberseguridad en Guatemala. Estado en vivo de sus proyectos: PacketLens, Diario de Aves, Amigo Secreto y Mi Red.',
+        'meta.desc': 'Selvin Mejía, ingeniero en Redes y Ciberseguridad en Guatemala. Estado en vivo de sus proyectos: PacketLens, NetKit, Diario de Aves, Amigo Secreto y Mi Red.',
         'nav.servicios': 'Servicios',
         'nav.bitacora': 'Bitácora',
         'nav.banco': 'Banco de trabajo',
@@ -79,6 +79,9 @@ window.I18N = {
         'an.total2': 'capturas en total',
         'an.visitas': 'visitas · 30 días',
         'an.privado': 'Las capturas nunca salen del navegador.',
+        'nk.usos': 'consultas · últimos 30 días',
+        'nk.top': 'la más usada',
+        'nk.sinDatos': '10 herramientas, sin registrarte.',
         'sec.faltan': 'días para Navidad',
         'sec.hoy': '¡Hoy es Navidad!',
         'sec.temporada': 'Temporada de intercambios',
@@ -116,7 +119,7 @@ window.I18N = {
     },
     en: {
         'meta.title': 'Selvin Mejía · personal NOC',
-        'meta.desc': 'Selvin Mejía, network and cybersecurity engineer in Guatemala. Live status of his projects: PacketLens, Bird Diary, Secret Santa and My Network.',
+        'meta.desc': 'Selvin Mejía, network and cybersecurity engineer in Guatemala. Live status of his projects: PacketLens, NetKit, Bird Diary, Secret Santa and My Network.',
         'nav.servicios': 'Services',
         'nav.bitacora': 'Log',
         'nav.banco': 'Workbench',
@@ -193,6 +196,9 @@ window.I18N = {
         'an.total2': 'captures all time',
         'an.visitas': 'visits · 30 days',
         'an.privado': 'Captures never leave the browser.',
+        'nk.usos': 'queries · last 30 days',
+        'nk.top': 'most used',
+        'nk.sinDatos': '10 tools, no sign-up.',
         'sec.faltan': 'days until Christmas',
         'sec.hoy': "It's Christmas!",
         'sec.temporada': 'Gift exchange season',

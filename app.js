@@ -164,6 +164,7 @@
     /* ----------------------------------------------------------- tarjetas */
     const ICONO_SVC = {
         packetlens: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M6.5 10.5h1.6l1.2-2.6 2 5.2 1.2-2.6h1.5"/></svg>',
+        netkit: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 12.5h18M10 12.5v2h4v-2"/></svg>',
         aves: '<svg viewBox="0 0 24 24"><path d="M16 7.5a3 3 0 0 0-5.8 1.1L4 13.5c2.5 3 7 3.6 10 1.3A6.5 6.5 0 0 0 16.6 9"/><path d="m16 7.5 3.5 1-3 .9"/><path d="m9 17-1 3.5M12 17.2l.5 3.3"/></svg>',
         secreto: '<svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="1.5"/><path d="M2.5 9h19M12 9v11.5"/><path d="M12 9c-1.5-3.5-5.5-4.5-5.5-1.8C6.5 9 12 9 12 9Zm0 0c1.5-3.5 5.5-4.5 5.5-1.8C17.5 9 12 9 12 9Z"/></svg>',
         mired: '<svg viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9 14.2a4.3 4.3 0 0 1 6 0M10.6 16.4a2 2 0 0 1 2.8 0"/></svg>',
@@ -215,9 +216,22 @@
         return `<div class="tunel ${st ? (st.ok ? 'ok' : 'bad') : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
             <span>${esc(t('mr.tunel'))}: <b>${esc(txt)}</b></span></div>`;
     }
-    const VIVO = { aves: vivoAves, packetlens: vivoPacketlens, secreto: vivoSecreto, mired: vivoMired };
+    const HERRAMIENTA_NK = {
+        'mi-ip': { es: 'Mi IP', en: 'My IP' }, subredes: { es: 'Subredes IPv4', en: 'IPv4 subnets' }, ipv6: { es: 'IPv6', en: 'IPv6' },
+        dns: { es: 'Consulta DNS', en: 'DNS lookup' }, correo: { es: 'SPF/DKIM/DMARC', en: 'SPF/DKIM/DMARC' }, mac: { es: 'Fabricante por MAC', en: 'MAC vendor' },
+        whois: { es: 'Whois', en: 'Whois' }, http: { es: 'Cabeceras HTTP', en: 'HTTP headers' }, conversor: { es: 'Conversor de IP', en: 'IP converter' }, puertos: { es: 'Puertos', en: 'Ports' },
+    };
+    function vivoNetkit() {
+        if (!estado) return '<span class="skel" style="width:60%"></span>';
+        const n = estado.netkit;
+        if (!n) return `<p class="nota">${esc(t('nk.sinDatos'))}</p>`;
+        const top = n.top ? L(HERRAMIENTA_NK[n.top] || { es: n.top, en: n.top }) : null;
+        return `<div><div class="cuenta"><b>${num(n.usos30)}</b><span>${esc(t('nk.usos'))}</span></div>${top ? `<p class="nota" style="margin-top:6px">${esc(t('nk.top'))}: <b style="color:var(--text)">${esc(top)}</b></p>` : ''}</div>`;
+    }
+    const VIVO = { netkit: vivoNetkit, aves: vivoAves, packetlens: vivoPacketlens, secreto: vivoSecreto, mired: vivoMired };
 
     function renderCards() {
+        $('#cards').classList.toggle('par', (C.servicios.length - 1) % 2 === 0);
         $('#cards').innerHTML = C.servicios.map((s, i) => {
             const st = svcEstado(s.id);
             const e = !st ? 'cargando' : st.ok ? 'ok' : 'caido';

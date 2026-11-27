@@ -15,6 +15,7 @@ const CACHE_SEG = 30;
 const SERVICIOS = [
     { id: 'aves', url: 'https://aves.selvinmejia.com/' },
     { id: 'packetlens', url: 'https://packetlens.selvinmejia.com/' },
+    { id: 'netkit', url: 'https://netkit.selvinmejia.com/' },
     { id: 'secreto', url: 'https://secreto.selvinmejia.com/' },
     // Privado (Cloudflare Access): responde con el inicio de sesión (302/401/403) y eso cuenta como en línea.
     // Si el túnel o la iMac están apagados, Cloudflare responde 5xx (502, 530…) y se marca caído.
@@ -167,6 +168,24 @@ async function sonda() {
     };
 }
 
+// ------------------------------------------------ NetKit (D1 netkit-datos, solo lectura)
+async function netkit(env) {
+    if (!env.NETKIT) return null;
+    try {
+        const desde = diaGT(29);
+        const [tot, top] = await env.NETKIT.batch([
+            env.NETKIT.prepare("SELECT SUM(tipo = 'uso') AS usos, SUM(tipo = 'visita') AS visitas FROM eventos WHERE dia >= ?").bind(desde),
+            env.NETKIT.prepare("SELECT herramienta AS k, COUNT(*) AS n FROM eventos WHERE dia >= ? AND tipo = 'uso' AND herramienta IS NOT NULL GROUP BY 1 ORDER BY 2 DESC LIMIT 1").bind(desde),
+        ]);
+        const t = (tot.results && tot.results[0]) || {};
+        const f = top.results && top.results[0];
+        return { usos30: t.usos || 0, visitas30: t.visitas || 0, top: f ? f.k : null };
+    } catch (e) {
+        console.log('netkit d1:', e.message);
+        return null;
+    }
+}
+
 // ------------------------------------------------ PacketLens (D1, solo lectura)
 function diaGT(offsetDias = 0) {
     const d = new Date(Date.now() - 6 * 3600e3 - offsetDias * 86400e3);
@@ -210,11 +229,12 @@ async function estado(env) {
     // Cancela los cuerpos que no vamos a leer
     for (const r of revisiones) if (r.res && r.id !== 'aves') r.res.body && r.res.body.cancel();
 
-    const [datosAves, datosPacketlens, datosClima, datosSonda] = await Promise.all([
+    const [datosAves, datosPacketlens, datosClima, datosSonda, datosNetkit] = await Promise.all([
         conLimite(aves(avesRes && avesRes.ok ? avesRes.res : null), 8000),
         conLimite(packetlens(env), 4000),
         conLimite(clima(), 5000),
         conLimite(sonda(), 6000),
+        conLimite(netkit(env), 4000),
     ]);
 
     return {
@@ -224,12 +244,13 @@ async function estado(env) {
         packetlens: datosPacketlens,
         clima: datosClima,
         sonda: datosSonda,
+        netkit: datosNetkit,
     };
 }
 
 async function apiEstado(request, env, ctx) {
     const cache = caches.default;
-    const clave = new Request(`https://${CANONICO}/__estado/v4`);
+    const clave = new Request(`https://${CANONICO}/__estado/v5`);
     const guardado = await cache.match(clave);
     if (guardado) return guardado;
 
@@ -279,7 +300,7 @@ function origenValido(request) {
 // tipo → detalles permitidos (null = cualquier palabra corta en minúsculas)
 const EVENTOS = {
     visita: new Set(['es', 'en']),
-    proyecto: new Set(['packetlens', 'aves', 'secreto', 'mired']),
+    proyecto: new Set(['packetlens', 'netkit', 'aves', 'secreto', 'mired']),
     terminal: new Set(['', 'boton', 'tecla']),
     comando: null,
     huevo: null,

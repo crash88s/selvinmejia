@@ -223,6 +223,7 @@ h1 { font-size: clamp(44px, 7vw, 76px); letter-spacing: -0.035em; font-weight: 7
 .c-verde { --a: var(--green); --a-soft: var(--green-soft); }
 .c-corinto { --a: var(--corinto); --a-soft: var(--corinto-soft); }
 .c-naranja { --a: var(--naranja); --a-soft: var(--naranja-soft); }
+.c-ambar { --a: var(--amber); --a-soft: var(--amber-soft); }
 .svc-info { display: flex; flex-direction: column; gap: 8px; }
 .svc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .svc-ico { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: color-mix(in srgb, var(--a) 16%, var(--surface)); border: 1px solid color-mix(in srgb, var(--a) 30%, transparent); }
@@ -603,3 +604,8 @@ h1 { font-size: clamp(44px, 6.4vw, 72px); }
     .pt-body .kk { white-space: normal; font-size: 11.5px; }
     .huevos-fila { padding-top: 0; }
 }
+
+
+/* servicios: con 4 tarjetas pequeñas, rejilla de 2 × 2 debajo de la destacada */
+.cards.par { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 680px) { .cards.par { grid-template-columns: 1fr; } }

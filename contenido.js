@@ -90,6 +90,18 @@ window.CONTENIDO = {
             etiquetas: ['PCAP', 'TCP/IP', 'TLS', 'Workers AI'],
         },
         {
+            id: 'netkit',
+            color: 'ambar',
+            url: 'https://netkit.selvinmejia.com',
+            nombre: { es: 'NetKit', en: 'NetKit' },
+            tipo: { es: 'herramientas · redes', en: 'tools · networking' },
+            desc: {
+                es: 'Subredes IPv4/IPv6, DNS, MAC, whois, SPF/DKIM/DMARC y más: 10 herramientas de red gratis.',
+                en: 'IPv4/IPv6 subnets, DNS, MAC, whois, SPF/DKIM/DMARC and more: 10 free network tools.',
+            },
+            etiquetas: ['VLSM', 'DNS', 'OUI', 'RDAP'],
+        },
+        {
             id: 'aves',
             color: 'verde',
             url: 'https://aves.selvinmejia.com',
@@ -149,6 +161,10 @@ window.CONTENIDO = {
     ],
 
     bitacora: [
+        {
+            fecha: '2026-11-26', nivel: 'deploy', origen: 'netkit',
+            texto: { es: 'NetKit en línea: 10 herramientas de red gratis (subredes, DNS, MAC, whois y más).', en: 'NetKit is live: 10 free network tools (subnets, DNS, MAC, whois and more).' },
+        },
         {
             fecha: '2026-11-23', nivel: 'deploy', origen: 'selvinmejia.com',
             texto: { es: 'Nuevo sitio principal en línea: un NOC personal con todos los proyectos.', en: 'New main site is live: a personal NOC with every project.' },

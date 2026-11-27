@@ -5,8 +5,9 @@ Cada proyecto se revisa en vivo y hay una terminal escondida (tecla <kbd>`</kbd>
 
 ## Qué muestra
 
-- **Estado general**: código HTTP y latencia de aves, packetlens, secreto y mired, revisados por el Worker cada 60 s.
+- **Estado general**: código HTTP y latencia de packetlens, netkit, aves, secreto y mired, revisados por el Worker cada 60 s.
 - **Diario de aves**: hallazgo del día, rareza, especies y detecciones (se leen de las etiquetas `og:` de aves.selvinmejia.com, en español y en inglés).
+- **NetKit**: consultas de los últimos 30 días y la herramienta más usada (base D1 `netkit-datos`, solo lectura).
 - **PacketLens**: capturas analizadas en 30 días y en total, y visitas (base D1 `tshoot-datos` de PacketLens, solo lectura).
 - **Amigo Secreto**: días que faltan para Navidad.
 - **Hora y clima** de Ciudad de Guatemala (Open-Meteo).

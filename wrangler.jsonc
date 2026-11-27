@@ -28,6 +28,13 @@
 			"database_name": "selvinmejia-datos",
 			"database_id": "3b649232-9954-48ad-9ba8-72b514f6d613"
 		},
+		// Conteos de NetKit (su base D1). Aquí solo se LEEN.
+		{
+			"binding": "NETKIT",
+			"database_name": "netkit-datos",
+			"database_id": "77498241-4e08-45a8-a0f5-be5b0b9015b6",
+			"remote": true
+		},
 		// Conteos de PacketLens (su base D1, que conserva el nombre tshoot-datos). Aquí solo se LEEN.
 		// "remote": true hace que la vista local también lea los datos reales de Cloudflare.
 		{

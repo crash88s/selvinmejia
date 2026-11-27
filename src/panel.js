@@ -138,7 +138,7 @@ function clientePanel(INICIO) {
         : { bar: '#0891b2', hover: '#0e7490', b2: '#ea580c', text: '#475569', muted: '#64748b', grid: 'rgba(15,23,42,0.07)', axis: 'rgba(15,23,42,0.15)', tipBg: '#ffffff', tipBorder: 'rgba(8,145,178,0.4)', tipTitle: '#0b1220',
             seq: ['#67e8f9', '#22d3ee', '#0891b2', '#0e7490', '#164e63'] });
 
-    const PROYECTO = { packetlens: 'PacketLens', aves: 'Diario de Aves', secreto: 'Amigo Secreto', mired: 'Mi Red' };
+    const PROYECTO = { packetlens: 'PacketLens', netkit: 'NetKit', aves: 'Diario de Aves', secreto: 'Amigo Secreto', mired: 'Mi Red' };
     const LLEGAN = { directo: 'Directo (link o favorito)', linkedin: 'LinkedIn', facebook: 'Facebook', instagram: 'Instagram', x: 'X (Twitter)', google: 'Google', bing: 'Bing', duckduckgo: 'DuckDuckGo', whatsapp: 'WhatsApp', github: 'GitHub', youtube: 'YouTube', tiktok: 'TikTok', reddit: 'Reddit', sitio: 'Tus otros sitios', otro: 'Otros sitios' };
     const DISP = { escritorio: 'Computadora', movil: 'Teléfono', tablet: 'Tablet' };
     const NAV = { chrome: 'Chrome', safari: 'Safari', edge: 'Edge', firefox: 'Firefox', opera: 'Opera', samsung: 'Samsung Internet', otro: 'Otro' };
