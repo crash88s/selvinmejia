@@ -171,86 +171,78 @@
     };
     const FLECHA = '<svg class="flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>';
 
-    function vivoAves() {
-        if (!estado) return '<span class="skel" style="width:70%"></span>';
-        return lineaSonda() || `<p class="nota">${esc(t('aves.sinDatos'))}</p>`;
-    }
-    function lineaSonda() {
-        const s = estado && estado.sonda;
-        if (!s) return '';
-        const det = [];
-        if (s.estado === 'sin_senal' || s.estado === 'sin_datos') {
-            if (s.reporteMin != null) det.push(t('sonda.reporte', { m: lapso(s.reporteMin) }));
-        } else {
-            if (s.audioMin != null) det.push(t('sonda.audio', { m: lapso(s.audioMin) }));
-            if (s.bateria != null) det.push(t('sonda.bateria', { b: s.bateria }) + (s.cargando ? ` · ${t('sonda.cargando')}` : ''));
-        }
-        const cls = s.estado === 'escuchando' ? 'ok' : s.estado === 'pausa' || s.estado === 'sin_audio' ? 'pausa' : 'bad';
-        return `<div class="sonda ${cls}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
-            <span><span>${esc(t('sonda.titulo'))}: <b>${esc(t('sonda.' + s.estado))}</b></span>${det.length ? `<i>${esc(det.join(' · '))}</i>` : ''}</span></div>`;
-    }
     // 7 min · 1 h 13 min · 2 d 3 h
     function lapso(m) {
         if (m < 60) return `${m} min`;
         if (m < 1440) return `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}`;
         return `${Math.floor(m / 1440)} d${Math.floor((m % 1440) / 60) ? ` ${Math.floor((m % 1440) / 60)} h` : ''}`;
     }
-    function vivoPacketlens() {
-        if (!estado) return '<span class="skel" style="width:60%"></span>';
-        const a = estado.packetlens;
-        if (!a) return `<p class="nota">${esc(t('an.privado'))}</p>`;
-        return `<div class="stats">
-                <div><b>${num(a.analisis30)}</b><span>${esc(t('an.mes'))}</span></div>
-                <div><b>${num(a.analisisTotal)}</b><span>${esc(t('an.total2'))}</span></div>
-                <div><b>${num(a.visitas30)}</b><span>${esc(t('an.visitas'))}</span></div>
-            </div>`;
-    }
-    function vivoSecreto() {
-        const d = diasNavidad();
-        return `<div class="cuenta"><b>${d === 0 ? '🎄' : num(d)}</b><span>${esc(d === 0 ? t('sec.hoy') : t('sec.faltan'))}</span></div>`;
-    }
-    function vivoMired() {
-        const st = svcEstado('mired');
-        const txt = !st ? '···' : st.ok ? t('mr.arriba') : t('mr.abajo');
-        return `<div class="tunel ${st ? (st.ok ? 'ok' : 'bad') : ''}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
-            <span>${esc(t('mr.tunel'))}: <b>${esc(txt)}</b></span></div>`;
-    }
     const HERRAMIENTA_NK = {
         'mi-ip': { es: 'Mi IP', en: 'My IP' }, subredes: { es: 'Subredes IPv4', en: 'IPv4 subnets' }, ipv6: { es: 'IPv6', en: 'IPv6' },
         dns: { es: 'Consulta DNS', en: 'DNS lookup' }, correo: { es: 'SPF/DKIM/DMARC', en: 'SPF/DKIM/DMARC' }, mac: { es: 'Fabricante por MAC', en: 'MAC vendor' },
         whois: { es: 'Whois', en: 'Whois' }, http: { es: 'Cabeceras HTTP', en: 'HTTP headers' }, conversor: { es: 'Conversor de IP', en: 'IP converter' }, puertos: { es: 'Puertos', en: 'Ports' },
     };
-    function vivoNetkit() {
-        if (!estado) return '<span class="skel" style="width:60%"></span>';
-        const n = estado.netkit;
-        if (!n) return `<p class="nota">${esc(t('nk.sinDatos'))}</p>`;
-        const top = n.top ? L(HERRAMIENTA_NK[n.top] || { es: n.top, en: n.top }) : null;
-        return `<div><div class="cuenta"><b>${num(n.usos30)}</b><span>${esc(t('nk.usos'))}</span></div>${top ? `<p class="nota" style="margin-top:6px">${esc(t('nk.top'))}: <b style="color:var(--text)">${esc(top)}</b></p>` : ''}</div>`;
-    }
-    const VIVO = { netkit: vivoNetkit, aves: vivoAves, packetlens: vivoPacketlens, secreto: vivoSecreto, mired: vivoMired };
+
+    /* Dato en vivo de cada app: [estado (ok|warn|bad|''), línea principal, línea secundaria] */
+    const VIVO = {
+        packetlens() {
+            const a = estado && estado.packetlens;
+            return a ? ['', `<b>${num(a.analisis30)}</b> ${esc(t('app.capturas'))}`, t('app.visitas', { n: num(a.visitas30) })] : null;
+        },
+        netkit() {
+            const n = estado && estado.netkit;
+            if (!n) return null;
+            const top = n.top ? L(HERRAMIENTA_NK[n.top] || { es: n.top, en: n.top }) : '';
+            return ['', `<b>${num(n.usos30)}</b> ${esc(t('app.consultas'))}`, top ? t('app.top', { h: top }) : ''];
+        },
+        aves() {
+            const s = estado && estado.sonda;
+            if (!s) return null;
+            const cls = s.estado === 'escuchando' ? 'ok' : s.estado === 'pausa' || s.estado === 'sin_audio' ? 'warn' : 'bad';
+            const det = [];
+            if (s.estado === 'sin_senal' || s.estado === 'sin_datos') { if (s.reporteMin != null) det.push(t('sonda.reporte', { m: lapso(s.reporteMin) })); }
+            else {
+                if (s.audioMin != null) det.push(t('app.audio', { m: lapso(s.audioMin) }));
+                if (s.bateria != null) det.push(`${s.cargando ? '⚡' : '🔋'} ${s.bateria} %`);
+            }
+            return [cls, `${esc(t('sonda.titulo'))} <b>${esc(t('sonda.' + s.estado))}</b>`, det.join(' · ')];
+        },
+        secreto() {
+            const d = diasNavidad();
+            return ['', d === 0 ? `<b>🎄 ${esc(t('sec.hoy'))}</b>` : `<b>${num(d)}</b> ${esc(t('sec.faltan'))}`, ''];
+        },
+        mired() {
+            const st = svcEstado('mired');
+            if (!st) return null;
+            return [st.ok ? 'ok' : 'bad', `${esc(t('mr.tunel'))} <b>${esc(st.ok ? t('mr.arriba') : t('mr.abajo'))}</b>`, t('app.privado')];
+        },
+    };
 
     function renderCards() {
-        $('#cards').classList.toggle('par', (C.servicios.length - 1) % 2 === 0);
-        $('#cards').innerHTML = C.servicios.map((s, i) => {
+        const cont = $('#cards');
+        cont.classList.remove('par');
+        cont.classList.add('lanzador');
+        cont.innerHTML = C.servicios.map((s) => {
             const st = svcEstado(s.id);
             const e = !st ? 'cargando' : st.ok ? 'ok' : 'caido';
-            const etq = !st ? t('svc.revisando') : st.ok ? `${st.ms} ms` : t('svc.caido');
             const enlace = s.privado ? s.url : `${s.url}${lang === 'en' ? (s.id === 'aves' ? '/en/' : '/?lang=en') : ''}`;
-            const destacado = i === 0;
-            return `<a class="svc c-${esc(s.color || 'azul')}${destacado ? ' destacado' : ''}" href="${esc(enlace)}" rel="noopener" data-estado="${e}" data-id="${esc(s.id)}">
-                <div class="svc-info">
-                    <div class="svc-head">
-                        <span class="svc-ico" aria-hidden="true">${ICONO_SVC[s.id] || ''}</span>
-                        <span class="svc-est" title="${esc(e === 'ok' ? t('svc.operativo') : etq)}"><span class="led ${e === 'ok' ? 'ok' : e === 'caido' ? 'bad' : ''}"></span>${esc(etq)}</span>
-                    </div>
-                    <span class="tipo">${esc(L(s.tipo))}</span>
-                    <h3>${esc(L(s.nombre))} ${FLECHA}</h3>
-                    <p class="desc">${esc(L(s.desc))}</p>
-                    ${destacado ? `<ul class="tags">${(s.etiquetas || []).map((x) => `<li>${esc(L(x))}</li>`).join('')}</ul>` : ''}
-                </div>
-                <div class="svc-vivo">${(VIVO[s.id] || (() => ''))()}</div>
-                <div class="svc-pie mono">${s.privado ? '🔒 ' : ''}${esc(host(s.url))}</div>
+            const v = (VIVO[s.id] || (() => null))();
+            const vivo = v
+                ? `<span class="app-vivo ${v[0]}">${v[0] ? '<i class="pt"></i>' : ''}<span class="v1">${v[1]}</span>${v[2] ? `<span class="v2">${esc(v[2])}</span>` : ''}</span>`
+                : '<span class="app-vivo"><span class="skel" style="width:70%"></span></span>';
+            const latencia = !st ? t('svc.revisando') : st.ok ? `${t('svc.operativo')} · ${st.ms} ms` : t('svc.caido');
+            return `<a class="svc app c-${esc(s.color || 'azul')}" href="${esc(enlace)}" rel="noopener" data-estado="${e}" data-id="${esc(s.id)}">
+                <span class="app-arte" aria-hidden="true">
+                    <span class="app-ico">${ICONO_SVC[s.id] || ''}</span>
+                    <span class="app-led ${e === 'ok' ? 'ok' : e === 'caido' ? 'bad' : ''}" title="${esc(latencia)}"></span>
+                    ${s.privado ? '<span class="app-candado">🔒</span>' : ''}
+                </span>
+                <span class="app-txt">
+                    <span class="app-nombre">${esc(L(s.nombre))}</span>
+                    <span class="app-lema">${esc(L(s.lema || s.tipo))}</span>
+                    ${vivo}
+                </span>
+                <span class="app-ir">${esc(s.privado ? t('app.entrar') : t('svc.abrir'))} ${FLECHA}</span>
             </a>`;
         }).join('');
     }

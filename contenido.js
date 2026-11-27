@@ -79,6 +79,7 @@ window.CONTENIDO = {
     servicios: [
         {
             id: 'packetlens',
+            lema: { es: 'Wireshark explicado en segundos', en: 'Wireshark explained in seconds' },
             color: 'azul',
             url: 'https://packetlens.selvinmejia.com',
             nombre: { es: 'PacketLens', en: 'PacketLens' },
@@ -91,6 +92,7 @@ window.CONTENIDO = {
         },
         {
             id: 'netkit',
+            lema: { es: '10 herramientas de red, gratis', en: '10 free network tools' },
             color: 'ambar',
             url: 'https://netkit.selvinmejia.com',
             nombre: { es: 'NetKit', en: 'NetKit' },
@@ -103,6 +105,7 @@ window.CONTENIDO = {
         },
         {
             id: 'aves',
+            lema: { es: "Las aves que cantan hoy en Guatemala", en: "Today's birdsong in Guatemala" },
             color: 'verde',
             url: 'https://aves.selvinmejia.com',
             nombre: { es: 'Diario de Aves', en: 'Bird Diary' },
@@ -115,6 +118,7 @@ window.CONTENIDO = {
         },
         {
             id: 'secreto',
+            lema: { es: 'Tu intercambio de regalos, sin enredos', en: 'Your gift exchange, sorted' },
             color: 'corinto',
             url: 'https://secreto.selvinmejia.com',
             nombre: { es: 'Amigo Secreto', en: 'Secret Santa' },
@@ -127,6 +131,7 @@ window.CONTENIDO = {
         },
         {
             id: 'mired',
+            lema: { es: 'La red de la casa, bajo control', en: 'The home network, under control' },
             color: 'naranja',
             url: 'https://mired.selvinmejia.com',
             privado: true,
