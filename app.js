@@ -238,7 +238,7 @@
                     ${s.privado ? '<span class="app-candado">🔒</span>' : ''}
                 </span>
                 <span class="app-txt">
-                    <span class="app-nombre">${esc(L(s.nombre))}</span>
+                    <span class="app-nombre">${esc(L(s.nombre))}${s.beta ? ' <span class="tag-beta">beta</span>' : ''}</span>
                     <span class="app-lema">${esc(L(s.lema || s.tipo))}</span>
                     ${vivo}
                 </span>

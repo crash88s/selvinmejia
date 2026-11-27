@@ -113,6 +113,7 @@ window.I18N = {
         'banco.construyendo': 'construyendo',
         'banco.pruebas': 'en pruebas',
         'banco.estudiando': 'estudiando',
+        'banco.beta': 'beta',
 
         'pie.hecho': 'Hecho en Guatemala',
         'pie.derechos': 'Todos los derechos reservados.',
@@ -237,6 +238,7 @@ window.I18N = {
         'banco.construyendo': 'building',
         'banco.pruebas': 'testing',
         'banco.estudiando': 'studying',
+        'banco.beta': 'beta',
 
         'pie.hecho': 'Made in Guatemala',
         'pie.derechos': 'All rights reserved.',

@@ -92,6 +92,7 @@ window.CONTENIDO = {
         },
         {
             id: 'netkit',
+            beta: true,
             lema: { es: '10 herramientas de red, gratis', en: '10 free network tools' },
             color: 'ambar',
             url: 'https://netkit.selvinmejia.com',
@@ -147,6 +148,15 @@ window.CONTENIDO = {
 
     banco: [
         {
+            nombre: { es: 'NetKit · beta', en: 'NetKit · beta' },
+            desc: {
+                es: 'Primera versión en línea: 10 herramientas de red. La estoy puliendo con lo que me cuenten quienes la usan.',
+                en: 'First version live: 10 network tools. I am polishing it with feedback from the people using it.',
+            },
+            estado: 'beta',
+            progreso: 70,
+        },
+        {
             nombre: { es: 'AWS Solutions Architect – Associate', en: 'AWS Solutions Architect – Associate' },
             desc: {
                 es: 'Preparándome para el SAA-C03: llevar lo aprendido en redes y seguridad a la nube.',
@@ -168,7 +178,7 @@ window.CONTENIDO = {
     bitacora: [
         {
             fecha: '2026-11-26', nivel: 'deploy', origen: 'netkit',
-            texto: { es: 'NetKit en línea: 10 herramientas de red gratis (subredes, DNS, MAC, whois y más).', en: 'NetKit is live: 10 free network tools (subnets, DNS, MAC, whois and more).' },
+            texto: { es: 'NetKit beta en línea: primera versión con 10 herramientas de red gratis (subredes, DNS, MAC, whois y más).', en: 'NetKit beta is live: first version with 10 free network tools (subnets, DNS, MAC, whois and more).' },
         },
         {
             fecha: '2026-11-23', nivel: 'deploy', origen: 'selvinmejia.com',
