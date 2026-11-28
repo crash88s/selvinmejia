@@ -277,8 +277,9 @@
         const auto = ((estado && estado.actualizaciones && estado.actualizaciones.ultimas) || [])
             .map((u) => ({ t: fechaGT(new Date(u.ts)), ts: u.ts, nivel: 'deploy', origen: u.p, texto: u.m || t('log.nueva') }));
         const fijos = [...auto, ...(C.bitacora || []).map((e) => ({ t: e.fecha, ts: Date.parse(`${e.fecha}T12:00:00-06:00`), nivel: e.nivel, origen: e.origen, texto: L(e.texto) }))]
-            .sort((a, b) => b.ts - a.ts).slice(0, 10);
-        $('#log').innerHTML = [...vivos, ...fijos].map((e) =>
+            .sort((a, b) => b.ts - a.ts);
+        const MAX_BITACORA = 7;   // en honor a CR7 ⚽
+        $('#log').innerHTML = [...vivos, ...fijos].slice(0, MAX_BITACORA).map((e) =>
             `<li class="${e.vivo ? 'vivo-evt' : ''}"><span class="t">${esc(e.t)}</span><span class="n ${esc(e.nivel)}">${esc(e.nivel)}</span>
              <span class="m"><span class="o">${esc(e.origen)}:</span>${esc(e.texto)}</span></li>`).join('');
     }
