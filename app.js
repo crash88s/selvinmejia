@@ -218,6 +218,12 @@
         },
     };
 
+    function actualizado(id) {
+        const ts = estado && estado.actualizaciones && estado.actualizaciones.porProyecto && estado.actualizaciones.porProyecto[id];
+        if (!ts) return '';
+        const m = Math.max(1, Math.round((Date.now() - ts) / 60000));
+        return `<span class="app-act" title="${esc(new Date(ts).toLocaleString(lang === 'en' ? 'en-US' : 'es-GT', { timeZone: TZ }))}">${esc(t('app.actualizado', { t: lapso(m) }))}</span>`;
+    }
     function renderCards() {
         const cont = $('#cards');
         cont.classList.remove('par');
@@ -242,7 +248,7 @@
                     <span class="app-lema">${esc(L(s.lema || s.tipo))}</span>
                     ${vivo}
                 </span>
-                <span class="app-ir">${esc(s.privado ? t('app.entrar') : t('svc.abrir'))} ${FLECHA}</span>
+                <span class="app-ir">${esc(s.privado ? t('app.entrar') : t('svc.abrir'))} ${FLECHA}${actualizado(s.id)}</span>
             </a>`;
         }).join('');
     }
@@ -268,7 +274,10 @@
     }
     function renderLog() {
         const vivos = eventosVivos().map((e) => ({ ...e, vivo: true }));
-        const fijos = (C.bitacora || []).map((e) => ({ t: e.fecha, nivel: e.nivel, origen: e.origen, texto: L(e.texto) }));
+        const auto = ((estado && estado.actualizaciones && estado.actualizaciones.ultimas) || [])
+            .map((u) => ({ t: fechaGT(new Date(u.ts)), ts: u.ts, nivel: 'deploy', origen: u.p, texto: u.m || t('log.nueva') }));
+        const fijos = [...auto, ...(C.bitacora || []).map((e) => ({ t: e.fecha, ts: Date.parse(`${e.fecha}T12:00:00-06:00`), nivel: e.nivel, origen: e.origen, texto: L(e.texto) }))]
+            .sort((a, b) => b.ts - a.ts).slice(0, 10);
         $('#log').innerHTML = [...vivos, ...fijos].map((e) =>
             `<li class="${e.vivo ? 'vivo-evt' : ''}"><span class="t">${esc(e.t)}</span><span class="n ${esc(e.nivel)}">${esc(e.nivel)}</span>
              <span class="m"><span class="o">${esc(e.origen)}:</span>${esc(e.texto)}</span></li>`).join('');

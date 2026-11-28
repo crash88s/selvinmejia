@@ -372,7 +372,25 @@ function clientePanel(INICIO) {
         await fetch(`/panel/api/donacion?id=${b.dataset.del}`, { method: 'DELETE' });
         cargar();
     });
+    async function cargarAct() {
+        try {
+            const r = await fetch('/panel/api/actualizaciones', { cache: 'no-store' });
+            if (!r.ok) throw new Error();
+            const { lista } = await r.json();
+            const f = (ts) => new Date(ts).toLocaleString('es-GT', { timeZone: 'America/Guatemala', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+            $('#t-act').innerHTML = lista.length
+                ? `<table class="dtable"><thead><tr><th>Cuándo</th><th>Proyecto</th><th>Mensaje</th><th>Commit</th><th></th></tr></thead><tbody>${lista.map((x) => `<tr style="${x.oculto ? 'opacity:.45' : ''}"><td>${esc(f(x.ts))}</td><td>${esc(x.proyecto)}</td><td>${esc(x.mensaje || 'Nueva versión publicada')}</td><td style="font-family:var(--mono)">${esc(x.commit_id || '')}</td><td><button class="btn" data-ocultar="${x.id}" data-v="${x.oculto ? 0 : 1}">${x.oculto ? 'Mostrar' : 'Ocultar'}</button></td></tr>`).join('')}</tbody></table>`
+                : '<div class="empty-note">Todavía no llega ninguna publicación. Aparecerán aquí cuando corras el publicar.sh de cualquier proyecto.</div>';
+        } catch { $('#t-act').innerHTML = '<div class="empty-note">No se pudo cargar.</div>'; }
+    }
+    $('#t-act').addEventListener('click', async (e) => {
+        const b = e.target.closest('[data-ocultar]');
+        if (!b) return;
+        await fetch('/panel/api/actualizacion', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: Number(b.dataset.ocultar), oculto: b.dataset.v === '1' }) });
+        cargarAct();
+    });
     cargar();
+    cargarAct();
 }
 
 export function paginaPanel({ email, sinDatos }) {
@@ -444,6 +462,11 @@ export function paginaPanel({ email, sinDatos }) {
       <button class="btn btn-primary" type="submit">Registrar</button>
     </form>
     <div id="t-don"></div>
+  </section>
+  <h2>Bitácora automática</h2>
+  <section class="card">
+    <header class="card-head"><h3>Publicaciones recibidas <span class="card-sub">· llegan solas desde cada publicar.sh; oculta las que no quieras mostrar en el sitio</span></h3></header>
+    <div id="t-act"></div>
   </section>
   <p class="note">Los conteos son anónimos: no se guardan IPs ni datos personales. El país viene de Cloudflare. Los navegadores con "No rastrear" y los robots no se cuentan. <span id="desde-inicio"></span></p>
 </main>

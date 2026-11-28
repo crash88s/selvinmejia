@@ -229,12 +229,13 @@ async function estado(env) {
     // Cancela los cuerpos que no vamos a leer
     for (const r of revisiones) if (r.res && r.id !== 'aves') r.res.body && r.res.body.cancel();
 
-    const [datosAves, datosPacketlens, datosClima, datosSonda, datosNetkit] = await Promise.all([
+    const [datosAves, datosPacketlens, datosClima, datosSonda, datosNetkit, datosAct] = await Promise.all([
         conLimite(aves(avesRes && avesRes.ok ? avesRes.res : null), 8000),
         conLimite(packetlens(env), 4000),
         conLimite(clima(), 5000),
         conLimite(sonda(), 6000),
         conLimite(netkit(env), 4000),
+        conLimite(actualizaciones(env), 4000),
     ]);
 
     return {
@@ -245,12 +246,13 @@ async function estado(env) {
         clima: datosClima,
         sonda: datosSonda,
         netkit: datosNetkit,
+        actualizaciones: datosAct,
     };
 }
 
 async function apiEstado(request, env, ctx) {
     const cache = caches.default;
-    const clave = new Request(`https://${CANONICO}/__estado/v5`);
+    const clave = new Request(`https://${CANONICO}/__estado/v6`);
     const guardado = await cache.match(clave);
     if (guardado) return guardado;
 
@@ -276,6 +278,7 @@ async function tablas(db) {
     if (tablasListas) return;
     await db.batch([
         db.prepare("CREATE TABLE IF NOT EXISTS conteo (dia TEXT NOT NULL, tipo TEXT NOT NULL, detalle TEXT NOT NULL DEFAULT '', n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (dia, tipo, detalle))"),
+        db.prepare("CREATE TABLE IF NOT EXISTS actualizacion (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER NOT NULL, proyecto TEXT NOT NULL, mensaje TEXT, commit_id TEXT, oculto INTEGER NOT NULL DEFAULT 0)"),
         db.prepare("CREATE TABLE IF NOT EXISTS donacion (id INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT NOT NULL, monto REAL NOT NULL, moneda TEXT NOT NULL DEFAULT 'USD', nombre TEXT, nota TEXT, creado TEXT NOT NULL)"),
     ]);
     tablasListas = true;
@@ -366,6 +369,47 @@ async function evento(request, env) {
     }
     await contarVarios(env, lista);
     return new Response(null, { status: 204 });
+}
+
+/* =============================================================== avisos de publicación (bitácora automática)
+   Cada publicar.sh llama a avisar.sh, que hace POST /api/deploy con la clave DEPLOY_TOKEN. */
+const PROYECTOS_DEPLOY = new Set(['packetlens', 'netkit', 'aves', 'secreto', 'mired', 'selvinmejia']);
+function mismoTexto(a, b) {
+    const x = enc.encode(String(a)), y = enc.encode(String(b));
+    if (x.length !== y.length) return false;
+    let d = 0;
+    for (let i = 0; i < x.length; i++) d |= x[i] ^ y[i];
+    return d === 0;
+}
+async function apiDeploy(request, env) {
+    if (request.method !== 'POST') return jsonR({ error: 'method' }, 405);
+    const m = /^Bearer\s+(.+)$/.exec(request.headers.get('Authorization') || '');
+    if (!env.DEPLOY_TOKEN || !m || !mismoTexto(m[1].trim(), env.DEPLOY_TOKEN)) return jsonR({ error: 'auth' }, 401);
+    if (!env.DATOS) return jsonR({ error: 'nodb' }, 503);
+    const d = await request.json().catch(() => ({}));
+    const p = String(d.p || '').toLowerCase();
+    if (!PROYECTOS_DEPLOY.has(p)) return jsonR({ error: 'proyecto' }, 400);
+    await tablas(env.DATOS);
+    await env.DATOS.prepare('INSERT INTO actualizacion (ts, proyecto, mensaje, commit_id) VALUES (?, ?, ?, ?)')
+        .bind(Date.now(), p, corta(d.m, 180) || null, /^[0-9a-f]{4,40}$/i.test(d.c || '') ? d.c : null).run();
+    return new Response(null, { status: 204 });
+}
+async function actualizaciones(env) {
+    if (!env.DATOS) return null;
+    try {
+        await tablas(env.DATOS);
+        const [ult, por] = await env.DATOS.batch([
+            env.DATOS.prepare('SELECT ts, proyecto, mensaje FROM actualizacion WHERE oculto = 0 ORDER BY ts DESC LIMIT 12'),
+            env.DATOS.prepare('SELECT proyecto, MAX(ts) AS ts FROM actualizacion GROUP BY proyecto'),
+        ]);
+        return {
+            ultimas: (ult.results || []).map((r) => ({ ts: r.ts, p: r.proyecto, m: r.mensaje || '' })),
+            porProyecto: Object.fromEntries((por.results || []).map((r) => [r.proyecto, r.ts])),
+        };
+    } catch (e) {
+        console.log('actualizaciones:', e.message);
+        return null;
+    }
 }
 
 /* =============================================================== panel privado con Google */
@@ -483,6 +527,16 @@ async function rutaPanel(request, env, url) {
         if (desde > hasta) desde = hasta;
         return jsonR(await estadisticas(env, desde, hasta));
     }
+    if (ruta === '/panel/api/actualizaciones' && request.method === 'GET') {
+        await tablas(env.DATOS);
+        const r = await env.DATOS.prepare('SELECT id, ts, proyecto, mensaje, commit_id, oculto FROM actualizacion ORDER BY ts DESC LIMIT 100').all();
+        return jsonR({ lista: r.results || [] });
+    }
+    if (ruta === '/panel/api/actualizacion' && request.method === 'PATCH') {
+        const d = await request.json().catch(() => ({}));
+        await env.DATOS.prepare('UPDATE actualizacion SET oculto = ? WHERE id = ?').bind(d.oculto ? 1 : 0, numero(d.id, 0)).run();
+        return jsonR({ ok: true });
+    }
     if (ruta === '/panel/api/donacion' && request.method === 'POST') {
         const d = await request.json().catch(() => ({}));
         const monto = Number(d.monto);
@@ -517,6 +571,7 @@ export default {
                 return json({ error: 'estado' }, { 'Cache-Control': 'no-store' });
             }
         }
+        if (url.pathname === '/api/deploy') return apiDeploy(request, env).catch((e) => { console.log('deploy:', e.message); return jsonR({ error: 'deploy' }, 500); });
         if (url.pathname === '/api/evento') return evento(request, env).catch((e) => { console.log('evento:', e.message); return new Response(null, { status: 204 }); });
         if (url.pathname === '/panel' || url.pathname.startsWith('/panel/')) {
             return rutaPanel(request, env, url).catch((e) => { console.log('panel:', e.message); return jsonR({ error: 'panel' }, 500); });

@@ -57,6 +57,16 @@ if ! "${WRANGLER[@]}" deploy; then
 fi
 ok "Worker selvinmejia publicado"
 
+# Clave de la bitácora automática (avisar.sh): se crea una sola vez, vive fuera del repositorio
+TOKEN_FILE="$HOME/.config/selvinmejia/deploy-token"
+if [[ ! -s "$TOKEN_FILE" ]]; then
+  mkdir -p "$(dirname "$TOKEN_FILE")" && ( umask 077; openssl rand -hex 32 > "$TOKEN_FILE" ) && chmod 600 "$TOKEN_FILE"
+  ok "clave de la bitácora creada en $TOKEN_FILE"
+fi
+if ! "${WRANGLER[@]}" secret list 2>/dev/null | grep -q DEPLOY_TOKEN; then
+  "${WRANGLER[@]}" secret put DEPLOY_TOKEN < "$TOKEN_FILE" >/dev/null && ok "clave de la bitácora guardada en Cloudflare"
+fi
+
 CURL=(curl -s -o /dev/null -w '%{http_code}')
 if curl --help all 2>/dev/null | grep -q -- '--doh-url'; then CURL+=(--doh-url https://cloudflare-dns.com/dns-query); fi
 printf '  Esperando a que %s responda' "$SITIO"
@@ -108,5 +118,6 @@ git pull -q --rebase --autostash origin main 2>/dev/null || true
 git push -q -u origin HEAD:main
 ok "código en $(git remote get-url origin | sed 's/\.git$//')"
 
+bash "$(pwd)/avisar.sh" selvinmejia "${MENSAJE:-}"
 printf '\n\033[1;32mListo.\033[0m  %s\n' "$SITIO"
 echo "Panel privado: $SITIO/panel  (la primera vez configúralo con: bash configurar-panel.sh)"
