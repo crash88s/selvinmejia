@@ -202,7 +202,7 @@
             const det = [];
             if (s.estado === 'sin_senal' || s.estado === 'sin_datos') { if (s.reporteMin != null) det.push(t('sonda.reporte', { m: lapso(s.reporteMin) })); }
             else {
-                if (s.audioMin != null) det.push(t('app.audio', { m: lapso(s.audioMin) }));
+                if (s.audioMin != null) det.push(s.audioMin < 1 ? t('app.audioYa') : t('app.audio', { m: lapso(s.audioMin) }));
                 if (s.bateria != null) det.push(`${s.cargando ? '⚡' : '🔋'} ${s.bateria} %`);
             }
             return [cls, `${esc(t('sonda.titulo'))} <b>${esc(t('sonda.' + s.estado))}</b>`, det.join(' · ')];
@@ -274,7 +274,15 @@
     }
     function renderLog() {
         const vivos = eventosVivos().map((e) => ({ ...e, vivo: true }));
+        const vistos = new Set();
         const auto = ((estado && estado.actualizaciones && estado.actualizaciones.ultimas) || [])
+            .filter((u) => {
+                if (u.m) return true;                       // con mensaje: siempre
+                const k = `${u.p}|${fechaGT(new Date(u.ts))}`;  // sin mensaje: una por proyecto y día
+                if (vistos.has(k)) return false;
+                vistos.add(k);
+                return true;
+            })
             .map((u) => ({ t: fechaGT(new Date(u.ts)), ts: u.ts, nivel: 'deploy', origen: u.p, texto: u.m || t('log.nueva') }));
         const fijos = [...auto, ...(C.bitacora || []).map((e) => ({ t: e.fecha, ts: Date.parse(`${e.fecha}T12:00:00-06:00`), nivel: e.nivel, origen: e.origen, texto: L(e.texto) }))]
             .sort((a, b) => b.ts - a.ts);

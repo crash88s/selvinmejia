@@ -399,7 +399,7 @@ async function actualizaciones(env) {
     try {
         await tablas(env.DATOS);
         const [ult, por] = await env.DATOS.batch([
-            env.DATOS.prepare('SELECT ts, proyecto, mensaje FROM actualizacion WHERE oculto = 0 ORDER BY ts DESC LIMIT 12'),
+            env.DATOS.prepare('SELECT ts, proyecto, mensaje FROM actualizacion WHERE oculto = 0 ORDER BY ts DESC LIMIT 40'),
             env.DATOS.prepare('SELECT proyecto, MAX(ts) AS ts FROM actualizacion GROUP BY proyecto'),
         ]);
         return {
